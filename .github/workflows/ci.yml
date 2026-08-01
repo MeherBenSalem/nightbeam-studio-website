@@ -21,6 +21,8 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Prepare env for compose validation
+        run: cp .env.example .env
       - name: Validate dev compose
         run: docker compose -f docker-compose.yml config
       - name: Validate prod compose

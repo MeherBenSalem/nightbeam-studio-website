@@ -66,7 +66,7 @@ describe.skipIf(!hasTestDb)("Prisma integration", () => {
 
   it("lists and reads back the project", async () => {
     const { prismaRepo } = await import("@/lib/db/repo-prisma");
-    const result = await prismaRepo.listProjects({ search: "test-birth" });
+    const result = await prismaRepo.listProjects({ search: "Birth of Steve" });
     expect(result.total).toBeGreaterThanOrEqual(1);
     const detail = await prismaRepo.getProjectBySlug("test-birth-of-steve");
     expect(detail?.versions[0]?.files[0]?.fileName).toBe("test.jar");

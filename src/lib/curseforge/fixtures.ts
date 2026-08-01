@@ -76,7 +76,8 @@ export const FIXTURE_MOD: CfMod = {
   isFeatured: true,
   popularityScore: 1000,
   gamePopularityRank: 42,
-  downloadsCount: 12_840,
+  downloadCount: 12_840,
+  thumbsUpCount: 47,
   categories: [
     { id: 1, name: "Adventure", slug: "adventure", classId: 6 },
     { id: 2, name: "Story & Lore", slug: "story", classId: 6 },

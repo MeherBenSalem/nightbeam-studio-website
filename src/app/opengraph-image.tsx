@@ -7,7 +7,7 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OgImage() {
-  const fontData = await readFile(join(process.cwd(), "src/assets/fonts/PressStart2P-Regular.ttf"));
+  const fontData = await readFile(join(process.cwd(), "src/assets/fonts/Monocraft.ttf"));
   return new ImageResponse(
     (
       <div
@@ -18,9 +18,9 @@ export default async function OgImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: 72,
-          background: "linear-gradient(135deg, #05070f 0%, #0b1020 45%, #101830 70%, #05070f 100%)",
+          background: "linear-gradient(135deg, #000000 0%, #0a0a0a 45%, #141414 70%, #000000 100%)",
           color: "#e2e8f0",
-          fontFamily: "PressStart2P",
+          fontFamily: "Monocraft",
           position: "relative",
         }}
       >
@@ -33,18 +33,18 @@ export default async function OgImage() {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 12,
-              background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
+              background: "linear-gradient(135deg, #2e2e2e, #f5f5f5)",
               fontSize: 28,
               color: "#ffffff",
             }}
           >
             NB
           </div>
-          <div style={{ fontSize: 28, letterSpacing: 4, color: "#22d3ee" }}>NIGHTBEAM STUDIO</div>
+          <div style={{ fontSize: 28, letterSpacing: 4, color: "#ffffff" }}>NIGHTBEAM STUDIO</div>
         </div>
         <div style={{ fontSize: 58, lineHeight: 1.3, color: "#ffffff", display: "flex", flexDirection: "column" }}>
           <span>THE BIRTH OF</span>
-          <span style={{ background: "linear-gradient(90deg, #a78bfa, #60a5fa, #22d3ee)", backgroundClip: "text", color: "transparent" }}>
+          <span style={{ background: "linear-gradient(90deg, #ffffff, #d4d4d4, #8a8a8a)", backgroundClip: "text", color: "transparent" }}>
             STEVE
           </span>
         </div>
@@ -55,7 +55,7 @@ export default async function OgImage() {
     ),
     {
       ...size,
-      fonts: [{ name: "PressStart2P", data: fontData, weight: 400 }],
+      fonts: [{ name: "Monocraft", data: fontData, weight: 400 }],
     },
   );
 }

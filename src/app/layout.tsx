@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Press_Start_2P } from "next/font/google";
+import localFont from "next/font/local";
 import { CookieConsent } from "@/components/layout/cookie-consent";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
@@ -8,8 +8,14 @@ import { auth } from "@/lib/auth/auth";
 import { getServerEnv } from "@/lib/config/env";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const pressStart = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-pixel-font", display: "swap" });
+const minecraft = localFont({
+  src: [
+    { path: "../assets/fonts/Monocraft.ttf", weight: "400", style: "normal" },
+    { path: "../assets/fonts/Monocraft-Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-minecraft",
+  display: "swap",
+});
 
 const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
 
@@ -77,7 +83,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     : null;
 
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${pressStart.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={minecraft.variable}>
       <body className="min-h-screen bg-night-950 text-slate-200">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <a

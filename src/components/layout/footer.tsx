@@ -13,9 +13,8 @@ export async function Footer() {
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5">
-              <span className="grid h-8 w-8 place-items-center rounded-md bg-gradient-to-br from-purple-600 to-cyan-500 font-pixel text-xs text-white">
-                NB
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/nb-logo.png" alt="" className="h-8 w-8 rounded-md object-contain" />
               <span className="font-pixel text-sm text-white">NIGHTBEAM STUDIO</span>
             </div>
             <p className="mt-4 max-w-md text-sm text-slate-400">

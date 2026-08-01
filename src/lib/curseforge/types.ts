@@ -94,7 +94,8 @@ export interface CfMod {
   isFeatured: boolean;
   popularityScore: number;
   gamePopularityRank: number;
-  downloadsCount: number;
+  downloadCount: number;
+  thumbsUpCount: number;
   categories: CfCategory[];
   status: number;
   classId: number;

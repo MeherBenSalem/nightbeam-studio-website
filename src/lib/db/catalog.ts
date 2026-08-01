@@ -186,7 +186,7 @@ export const SEED_SECTIONS = [
 ] as const;
 
 export const SEED_SOCIALS = [
-  { platform: "GITHUB", label: "GitHub", url: "https://github.com/MeherBenSalem", sortOrder: 0 },
-  { platform: "YOUTUBE", label: "YouTube", url: "https://www.youtube.com/@NightBeamStudio", sortOrder: 1 },
-  { platform: "DISCORD", label: "Discord", url: "https://discord.gg/nightbeam", sortOrder: 2 },
+  { platform: "GITHUB", label: "GitHub", url: "https://github.com/MeherBenSalem?tab=repositories", sortOrder: 0 },
+  { platform: "YOUTUBE", label: "YouTube", url: "https://www.youtube.com/@nightbeamstudio", sortOrder: 1 },
+  { platform: "DISCORD", label: "Discord", url: "https://discord.gg/e4hRcaZM8G", sortOrder: 2 },
 ] as const;

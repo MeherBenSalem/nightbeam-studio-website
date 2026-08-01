@@ -1,6 +1,6 @@
 import "server-only";
 import { getServerEnv } from "@/lib/config/env";
-import { getAuthorMods, getModFiles } from "@/lib/curseforge/client";
+import { getAuthorMods, getModFiles, searchMods } from "@/lib/curseforge/client";
 import { isCurseForgeConfigured } from "@/lib/curseforge/client";
 import { mapCfModToDetail } from "@/lib/curseforge/mapper";
 import { getRepo } from "@/lib/db/repo";
@@ -26,8 +26,10 @@ export async function runCurseForgeSync(): Promise<SyncStateDto> {
   });
 
   try {
-    const authorId = Number(env.CURSEFORGE_AUTHOR_ID);
-    const mods = await getAuthorMods(authorId);
+    const authorId = env.CURSEFORGE_AUTHOR_ID ? Number(env.CURSEFORGE_AUTHOR_ID) : null;
+    const mods = authorId && Number.isFinite(authorId)
+      ? await getAuthorMods(authorId)
+      : await searchMods(env.CURSEFORGE_SEARCH_TERM ?? "the birth of steve");
     let synced = 0;
     for (const mod of mods) {
       const files = await getModFiles(mod.id);

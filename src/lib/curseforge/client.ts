@@ -17,7 +17,7 @@ export class CurseForgeError extends Error {
 
 export function isCurseForgeConfigured(): boolean {
   const env = getServerEnv();
-  return Boolean(env.CURSEFORGE_API_KEY && env.CURSEFORGE_AUTHOR_ID);
+  return Boolean(env.CURSEFORGE_API_KEY && (env.CURSEFORGE_AUTHOR_ID || env.CURSEFORGE_SEARCH_TERM));
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
@@ -63,6 +63,19 @@ export async function getAuthorMods(authorId: string | number): Promise<CfMod[]>
 
   const response = await fetchJson<CfSearchResponse>(
     `/v1/mods/search?gameId=${env.CURSEFORGE_GAME_ID}&authorId=${authorId}&pageSize=50&sortField=1&sortOrder=desc`,
+  );
+  await cache.set(cacheKey, response.data, ttlFor("projects"));
+  return response.data;
+}
+
+export async function searchMods(searchTerm: string): Promise<CfMod[]> {
+  const env = getServerEnv();
+  const cacheKey = `search:${searchTerm.toLowerCase().replace(/\s+/g, "-")}`;
+  const cached = await cache.get<CfMod[]>(cacheKey);
+  if (cached) return cached;
+
+  const response = await fetchJson<CfSearchResponse>(
+    `/v1/mods/search?gameId=${env.CURSEFORGE_GAME_ID}&searchFilter=${encodeURIComponent(searchTerm)}&pageSize=50&sortField=1&sortOrder=desc`,
   );
   await cache.set(cacheKey, response.data, ttlFor("projects"));
   return response.data;

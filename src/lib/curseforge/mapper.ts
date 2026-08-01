@@ -84,7 +84,7 @@ export function mapCfModToSummary(mod: CfMod): ProjectSummary {
     bannerUrl: mod.screenshots[0]?.url ?? null,
     featured: mod.isFeatured,
     status: mod.status === 4 ? "ACTIVE" : mod.status === 5 ? "ARCHIVED" : "ACTIVE",
-    downloads: mod.downloadsCount,
+    downloads: mod.downloadCount,
     followers: 0,
     views: 0,
     rating: 0,

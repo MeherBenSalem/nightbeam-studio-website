@@ -17,7 +17,7 @@ import {
 } from "@/lib/auth/schemas";
 import { revokeAllSessions } from "@/lib/auth/session-revocation";
 import { verifyTurnstile } from "@/lib/auth/turnstile";
-import { getServerEnv } from "@/lib/config/env";
+import { getServerEnv, isSmtpConfigured } from "@/lib/config/env";
 import { getRepo } from "@/lib/db/repo";
 
 export interface ActionState {
@@ -34,6 +34,9 @@ function randomToken(): string {
 
 export async function registerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const env = getServerEnv();
+  if (process.env.NODE_ENV === "production" && !isSmtpConfigured()) {
+    return { error: "Sign-ups are temporarily unavailable. Please check back soon." };
+  }
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),

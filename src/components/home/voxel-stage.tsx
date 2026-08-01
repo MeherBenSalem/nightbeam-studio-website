@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 
 const COLORS = {
-  top: ["#312e81", "#4c1d95", "#155e75", "#14532d", "#1e3a8a"],
-  side: ["#1e1b4b", "#2e1065", "#164e63", "#14532d", "#172554"],
-  glow: "167, 139, 250",
+  top: ["#3a3a3a", "#2a2a2a", "#4a4a4a", "#222222", "#333333"],
+  side: ["#1a1a1a", "#151515", "#202020", "#121212", "#1c1c1c"],
+  glow: "255, 255, 255",
 };
 
 interface Voxel {
@@ -144,7 +144,7 @@ export function VoxelStage() {
       const radius = Math.min(width, height) * 0.13;
       const pulse = 1 + Math.sin(time * 1.2) * 0.04;
       const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * pulse);
-      gradient.addColorStop(0, "rgba(34,211,238,0.5)");
+      gradient.addColorStop(0, "rgba(255,255,255,0.45)");
       gradient.addColorStop(0.55, `rgba(${COLORS.glow},0.28)`);
       gradient.addColorStop(1, "rgba(5,7,15,0)");
       ctx.fillStyle = gradient;

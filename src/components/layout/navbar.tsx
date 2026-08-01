@@ -31,9 +31,8 @@ export function Navbar({ user }: { user: NavUser | null }) {
     <header className="sticky top-0 z-40 border-b border-night-600/50 bg-night-950/85 backdrop-blur">
       <nav aria-label="Main" className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="group flex items-center gap-2.5" aria-label="NightBeam Studio home">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-gradient-to-br from-purple-600 to-cyan-500 font-pixel text-sm text-white shadow-[0_0_18px_rgb(124_58_237/0.5)]">
-            NB
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/nb-logo.png" alt="" className="h-9 w-9 rounded-md object-contain" />
           <span className="font-pixel text-sm text-white group-hover:text-pixel-cyan">NIGHTBEAM</span>
         </Link>
 
@@ -78,7 +77,7 @@ export function Navbar({ user }: { user: NavUser | null }) {
               </Link>
               <Link
                 href="/auth/register"
-                className="inline-flex h-8 items-center rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-3 text-sm font-medium text-white shadow-[0_0_18px_rgb(124_58_237/0.45)] hover:from-purple-500 hover:to-blue-500"
+                className="inline-flex h-8 items-center rounded-md bg-gradient-to-r from-purple-600 to-blue-600 px-3 text-sm font-medium text-white shadow-[0_0_18px_rgb(255_255_255/0.2)] hover:from-purple-500 hover:to-blue-500"
               >
                 Join
               </Link>

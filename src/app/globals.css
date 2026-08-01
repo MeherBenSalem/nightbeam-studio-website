@@ -1,28 +1,52 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter);
-  --font-pixel: var(--font-pixel-font);
+  --font-sans: var(--font-minecraft);
+  --font-pixel: var(--font-minecraft);
 
-  --color-night-950: #05070f;
-  --color-night-900: #0b1020;
-  --color-night-850: #0d1428;
-  --color-night-800: #101830;
-  --color-night-700: #182240;
-  --color-night-600: #223050;
-  --color-night-500: #31406a;
+  --color-night-950: #000000;
+  --color-night-900: #0a0a0a;
+  --color-night-850: #0d0d0d;
+  --color-night-800: #141414;
+  --color-night-700: #1e1e1e;
+  --color-night-600: #2e2e2e;
+  --color-night-500: #4a4a4a;
 
-  --color-pixel-purple: #a78bfa;
-  --color-pixel-blue: #60a5fa;
-  --color-pixel-cyan: #22d3ee;
-  --color-pixel-green: #4ade80;
-  --color-pixel-pink: #f472b6;
-  --color-pixel-amber: #fbbf24;
+  --color-pixel-purple: #f5f5f5;
+  --color-pixel-blue: #d6d6d6;
+  --color-pixel-cyan: #ffffff;
+  --color-pixel-green: #e8e8e8;
+  --color-pixel-pink: #cfcfcf;
+  --color-pixel-amber: #b3b3b3;
+
+  /* Black & white palette (overrides default Tailwind accents) */
+  --color-purple-950: #050505;
+  --color-purple-700: #171717;
+  --color-purple-600: #1f1f1f;
+  --color-purple-500: #3a3a3a;
+  --color-blue-600: #1a1a1a;
+  --color-blue-500: #333333;
+  --color-cyan-600: #1d1d1d;
+  --color-cyan-400: #d9d9d9;
+  --color-cyan-500: #f5f5f5;
+  --color-cyan-950: #050505;
+  --color-green-600: #1a1a1a;
+  --color-green-400: #d4d4d4;
+  --color-green-300: #e5e5e5;
+  --color-green-500: #333333;
+  --color-pink-500: #555555;
+  --color-amber-400: #666666;
+  --color-amber-500: #555555;
+  --color-amber-300: #cccccc;
+  --color-red-600: #333333;
+  --color-red-500: #555555;
+  --color-red-400: #dddddd;
+  --color-red-300: #dddddd;
 }
 
 :root {
-  --background: #05070f;
-  --foreground: #e2e8f0;
+  --background: #000000;
+  --foreground: #e5e5e5;
 }
 
 html {
@@ -32,12 +56,12 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-minecraft), "Courier New", ui-monospace, monospace;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: rgb(124 58 237 / 0.45);
+  background: rgb(255 255 255 / 0.35);
   color: #fff;
 }
 
@@ -47,19 +71,19 @@ body {
 }
 
 @utility font-pixel {
-  font-family: var(--font-pixel), monospace;
+  font-family: var(--font-minecraft), monospace;
 }
 
 @utility text-glow-cyan {
-  text-shadow: 0 0 12px rgb(34 211 238 / 0.65), 0 0 32px rgb(34 211 238 / 0.35);
+  text-shadow: 0 0 12px rgb(255 255 255 / 0.65), 0 0 32px rgb(255 255 255 / 0.35);
 }
 
 @utility text-glow-purple {
-  text-shadow: 0 0 12px rgb(167 139 250 / 0.65), 0 0 32px rgb(167 139 250 / 0.35);
+  text-shadow: 0 0 12px rgb(255 255 255 / 0.65), 0 0 32px rgb(255 255 255 / 0.35);
 }
 
 @utility text-gradient {
-  background: linear-gradient(100deg, #a78bfa 0%, #60a5fa 35%, #22d3ee 70%, #4ade80 100%);
+  background: linear-gradient(100deg, #ffffff 0%, #d4d4d4 35%, #9a9a9a 70%, #6b6b6b 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -67,32 +91,32 @@ body {
 
 @utility bg-grid {
   background-image:
-    linear-gradient(rgb(96 165 250 / 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(96 165 250 / 0.07) 1px, transparent 1px);
+    linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
 @utility bg-grid-dense {
   background-image:
-    linear-gradient(rgb(34 211 238 / 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(34 211 238 / 0.08) 1px, transparent 1px);
+    linear-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 
 @utility pixel-panel {
-  background: linear-gradient(180deg, rgb(16 24 48 / 0.9), rgb(11 16 32 / 0.95));
-  border: 1px solid rgb(49 64 106 / 0.6);
+  background: linear-gradient(180deg, rgb(20 20 20 / 0.9), rgb(10 10 10 / 0.95));
+  border: 1px solid rgb(74 74 74 / 0.6);
   box-shadow:
-    0 0 0 1px rgb(5 7 15 / 0.8),
+    0 0 0 1px rgb(0 0 0 / 0.8),
     0 12px 40px -12px rgb(0 0 0 / 0.7),
-    inset 0 1px 0 0 rgb(167 139 250 / 0.08);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.08);
 }
 
 @utility pixel-border {
-  border: 1px solid rgb(49 64 106 / 0.7);
+  border: 1px solid rgb(74 74 74 / 0.7);
   box-shadow:
-    0 3px 0 0 rgb(5 7 15 / 0.9),
-    inset 0 0 0 1px rgb(5 7 15 / 0.35);
+    0 3px 0 0 rgb(0 0 0 / 0.9),
+    inset 0 0 0 1px rgb(0 0 0 / 0.35);
 }
 
 @utility scanlines {

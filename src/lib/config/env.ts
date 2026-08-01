@@ -33,6 +33,7 @@ const serverEnvSchema = z.object({
   TURNSTILE_SECRET_KEY: z.string().optional(),
   CURSEFORGE_API_KEY: z.string().optional(),
   CURSEFORGE_AUTHOR_ID: z.string().optional(),
+  CURSEFORGE_SEARCH_TERM: z.string().optional(),
   CURSEFORGE_GAME_ID: z.coerce.number().default(432),
   CACHE_TTL_PROJECTS: z.coerce.number().default(900),
   CACHE_TTL_DETAILS: z.coerce.number().default(1800),
@@ -41,12 +42,12 @@ const serverEnvSchema = z.object({
   SYNC_ENABLED: bool(true),
   CRON_SYNC: z.string().default("*/30 * * * *"),
   CRON_DIGEST: z.string().default("0 9 * * 1"),
-  COMMUNITY_DISCORD_URL: z.string().url().default("https://discord.gg/nightbeam"),
+  COMMUNITY_DISCORD_URL: z.string().url().default("https://discord.gg/e4hRcaZM8G"),
   COMMUNITY_YOUTUBE_URL: z
     .string()
     .url()
-    .default("https://www.youtube.com/@NightBeamStudio"),
-  COMMUNITY_GITHUB_URL: z.string().url().default("https://github.com/MeherBenSalem"),
+    .default("https://www.youtube.com/@nightbeamstudio"),
+  COMMUNITY_GITHUB_URL: z.string().url().default("https://github.com/MeherBenSalem?tab=repositories"),
   COMMUNITY_DISCORD_MEMBERS: z.coerce.number().default(0),
   COMMUNITY_YOUTUBE_SUBSCRIBERS: z.coerce.number().default(0),
   COMMUNITY_GITHUB_STARS: z.coerce.number().default(0),

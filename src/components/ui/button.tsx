@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 
 const variants = {
   primary:
-    "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 shadow-[0_0_18px_rgb(124_58_237/0.45)]",
+    "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-500 hover:to-blue-500 shadow-[0_0_18px_rgb(255_255_255/0.2)]",
   secondary:
     "bg-night-800 text-slate-200 border border-night-500/60 hover:border-pixel-cyan/60 hover:text-white",
   ghost: "text-slate-300 hover:bg-night-800 hover:text-white",

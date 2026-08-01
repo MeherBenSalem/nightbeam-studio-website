@@ -14,12 +14,32 @@ export const SORTS = [
 
 export const SORT_VALUES = SORTS.map((s) => s.value);
 
-const SINGLE = new Set<keyof ProjectFilters>(["type", "version", "loader", "platform", "category", "search", "sort", "view", "page", "perPage"]);
+const SINGLE = new Set<keyof ProjectFilters>(["type", "platform", "search", "sort", "view", "page", "perPage"]);
+const MULTI = new Set<string>(["versions", "loaders", "categories"]);
+const LEGACY_SINGLE = new Map<string, keyof ProjectFilters>([
+  ["version", "versions"],
+  ["loader", "loaders"],
+  ["category", "categories"],
+]);
 
 export function parseFilterParams(params: URLSearchParams): ProjectFilters {
   const filters: ProjectFilters = { page: 1, perPage: 12, view: "grid" };
   for (const [key, value] of params.entries()) {
     if (!value) continue;
+    const resolvedKey = LEGACY_SINGLE.get(key) ?? key;
+    if (MULTI.has(resolvedKey)) {
+      if (resolvedKey === "loaders") {
+        if (LOADERS.includes(value as Loader)) {
+          filters.loaders = [...(filters.loaders ?? []), value as Loader];
+        }
+      } else {
+        filters[resolvedKey as "versions" | "categories"] = [
+          ...(filters[resolvedKey as "versions" | "categories"] ?? []),
+          value.slice(0, 80),
+        ];
+      }
+      continue;
+    }
     if (SINGLE.has(key as keyof ProjectFilters)) {
       const k = key as keyof ProjectFilters;
       if (k === "page") filters.page = Math.max(1, parseInt(value, 10) || 1);
@@ -28,10 +48,7 @@ export function parseFilterParams(params: URLSearchParams): ProjectFilters {
         filters.sort = value as ProjectFilters["sort"];
       } else if (k === "view" && (value === "grid" || value === "list")) filters.view = value;
       else if (k === "type" && PROJECT_TYPES.includes(value as ProjectType)) filters.type = value as ProjectType;
-      else if (k === "loader" && LOADERS.includes(value as Loader)) filters.loader = value as Loader;
-      else if (k === "version") filters.version = value;
       else if (k === "platform") filters.platform = value;
-      else if (k === "category") filters.category = value;
       else if (k === "search") filters.search = value.slice(0, 120);
     }
   }
@@ -42,15 +59,15 @@ export function serializeFilterParams(filters: ProjectFilters): string {
   const params = new URLSearchParams();
   const entries: Array<[keyof ProjectFilters, string | number | undefined]> = [
     ["type", filters.type],
-    ["version", filters.version],
-    ["loader", filters.loader],
     ["platform", filters.platform],
-    ["category", filters.category],
     ["search", filters.search],
     ["sort", filters.sort],
     ["view", filters.view],
     ["page", filters.page && filters.page > 1 ? filters.page : undefined],
   ];
+  for (const loader of filters.loaders ?? []) params.append("loaders", loader);
+  for (const version of filters.versions ?? []) params.append("versions", version);
+  for (const category of filters.categories ?? []) params.append("categories", category);
   for (const [key, value] of entries) {
     if (value !== undefined && value !== "" && value !== "grid") params.set(key, String(value));
   }

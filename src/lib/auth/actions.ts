@@ -17,7 +17,7 @@ import {
 } from "@/lib/auth/schemas";
 import { revokeAllSessions } from "@/lib/auth/session-revocation";
 import { verifyTurnstile } from "@/lib/auth/turnstile";
-import { getServerEnv, isSmtpConfigured } from "@/lib/config/env";
+import { getServerEnv } from "@/lib/config/env";
 import { getRepo } from "@/lib/db/repo";
 
 export interface ActionState {
@@ -34,7 +34,7 @@ function randomToken(): string {
 
 export async function registerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const env = getServerEnv();
-  if (process.env.NODE_ENV === "production" && !isSmtpConfigured()) {
+  if (!env.SIGNUPS_ENABLED) {
     return { error: "Sign-ups are temporarily unavailable. Please check back soon." };
   }
   const parsed = registerSchema.safeParse({
@@ -56,7 +56,7 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
   const existing = await repo.getUserAuthByEmail(parsed.data.email);
   if (existing) return { error: "An account with this email already exists." };
 
-  const autoVerify = env.DEV_AUTO_VERIFY && process.env.NODE_ENV !== "production" && !env.SMTP_HOST;
+  const autoVerify = env.DEV_AUTO_VERIFY && !env.SMTP_HOST;
   const passwordHash = await bcrypt.hash(parsed.data.password, 10);
   const user = await repo.createUser({
     name: parsed.data.name,

@@ -92,13 +92,13 @@ export const prismaRepo: DataRepo = {
         { tags: { some: { tag: { name: { contains: q, mode: "insensitive" } } } } },
       ];
     }
-    if (filters.version || filters.loader) {
+    if (filters.versions?.length || filters.loaders?.length) {
       const versionWhere: Prisma.ProjectVersionWhereInput = {};
-      if (filters.version) versionWhere.minecraftVersions = { has: filters.version };
-      if (filters.loader) versionWhere.loaders = { has: filters.loader };
+      if (filters.versions?.length) versionWhere.minecraftVersions = { hasSome: filters.versions };
+      if (filters.loaders?.length) versionWhere.loaders = { hasSome: filters.loaders };
       where.versions = { some: versionWhere };
     }
-    if (filters.category) where.categories = { some: { category: { slug: filters.category } } };
+    if (filters.categories?.length) where.categories = { some: { category: { slug: { in: filters.categories } } } };
     if (filters.platform === "curseforge") where.curseforgeId = { not: null };
 
     const orderBy: Prisma.ProjectOrderByWithRelationInput[] =

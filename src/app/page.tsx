@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { AnnouncementBar } from "@/components/home/announcement-bar";
-import { VoxelStage } from "@/components/home/voxel-stage";
+import { YouTubeEmbed } from "@/components/home/youtube-embed";
 import { ProjectCard } from "@/components/projects/project-card";
 import { ArrowRightIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { PixelHeading } from "@/components/ui/pixel-heading";
 import { StatCounter } from "@/components/ui/stat-counter";
 import { getRepo } from "@/lib/db/repo";
+import { getLatestVideoId } from "@/lib/youtube";
 import { formatNumber } from "@/lib/utils/format";
 
 export const revalidate = 60;
@@ -20,6 +21,7 @@ export default async function HomePage() {
     repo.getCommunityStats(),
     repo.getEnabledSections(),
   ]);
+  const videoId = await getLatestVideoId();
 
   const sectionsEnabled = new Set(sections.map((section) => section.key));
   const heroProject = projects[0];
@@ -42,8 +44,8 @@ export default async function HomePage() {
               THE BIRTH OF <span className="text-gradient">STEVE</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-slate-300">
-              A story-driven Minecraft mod by <strong className="text-white">Mahou</strong>. Where did the first survivor
-              come from? Uncover the origin — one block at a time.
+              A story-driven Minecraft mod by <strong className="text-white">NIGHTBEAM</strong>. Where did the first
+              survivor come from? Uncover the origin — one block at a time.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button size="lg">
@@ -69,7 +71,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <VoxelStage />
+          <YouTubeEmbed videoId={videoId} channelUrl={community.youtubeUrl} />
         </div>
       </section>
 
@@ -136,7 +138,6 @@ export default async function HomePage() {
               <a href={community.githubUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel rounded-xl p-5 text-center transition-colors hover:border-pixel-cyan/60">
                 <div className="font-pixel text-2xl text-pixel-green">GH</div>
                 <div className="mt-2 text-sm font-medium text-white">GitHub</div>
-                <div className="text-xs text-slate-500">{formatNumber(community.githubStars)} stars</div>
               </a>
             </div>
           </div>

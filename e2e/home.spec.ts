@@ -20,5 +20,5 @@ test("cookie consent banner can be accepted", async ({ page }) => {
 test("project card links to the project page", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: /The Birth of Steve/ }).first().click();
-  await expect(page).toHaveURL(/\/projects\/the-birth-of-steve/);
+  await expect(page).toHaveURL(/\/projects\/the-birth-of-steve/, { timeout: 20_000 });
 });

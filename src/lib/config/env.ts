@@ -7,6 +7,11 @@ const bool = (def: boolean) =>
     .optional()
     .transform((v) => (v === undefined ? def : v === "true" || v === "1"));
 
+const signups = z
+  .enum(["true", "false", "1", "0"])
+  .optional()
+  .transform((v) => (v === undefined ? process.env.NODE_ENV !== "production" : v === "true" || v === "1"));
+
 const serverEnvSchema = z.object({
   APP_URL: z.string().url().default("http://localhost:3000"),
   APP_NAME: z.string().default("NightBeam Studio"),
@@ -30,11 +35,15 @@ const serverEnvSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM: z.string().default("NightBeam Studio <no-reply@nightbeam.studio>"),
   DEV_AUTO_VERIFY: bool(true),
+  SIGNUPS_ENABLED: signups,
   TURNSTILE_SECRET_KEY: z.string().optional(),
   CURSEFORGE_API_KEY: z.string().optional(),
   CURSEFORGE_AUTHOR_ID: z.string().optional(),
   CURSEFORGE_SEARCH_TERM: z.string().optional(),
   CURSEFORGE_GAME_ID: z.coerce.number().default(432),
+  YOUTUBE_VIDEO_ID: z.string().optional(),
+  YOUTUBE_CHANNEL_HANDLE: z.string().default("@nightbeamstudio"),
+  GOOGLE_API_KEY: z.string().optional(),
   CACHE_TTL_PROJECTS: z.coerce.number().default(900),
   CACHE_TTL_DETAILS: z.coerce.number().default(1800),
   CACHE_TTL_STATS: z.coerce.number().default(600),
@@ -48,8 +57,8 @@ const serverEnvSchema = z.object({
     .url()
     .default("https://www.youtube.com/@nightbeamstudio"),
   COMMUNITY_GITHUB_URL: z.string().url().default("https://github.com/MeherBenSalem?tab=repositories"),
-  COMMUNITY_DISCORD_MEMBERS: z.coerce.number().default(0),
-  COMMUNITY_YOUTUBE_SUBSCRIBERS: z.coerce.number().default(0),
+  COMMUNITY_DISCORD_MEMBERS: z.coerce.number().default(3000),
+  COMMUNITY_YOUTUBE_SUBSCRIBERS: z.coerce.number().default(380),
   COMMUNITY_GITHUB_STARS: z.coerce.number().default(0),
   ANALYTICS_ENABLED: bool(true),
 });

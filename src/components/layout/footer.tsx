@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getDataBackendLabel, getRepo } from "@/lib/db/repo";
+import { getRepo } from "@/lib/db/repo";
 import { getServerEnv } from "@/lib/config/env";
 
 export async function Footer() {
   const repo = await getRepo();
-  const [socials, backend] = await Promise.all([repo.getSocialLinks(), getDataBackendLabel()]);
+  const socials = await repo.getSocialLinks();
   const env = getServerEnv();
 
   return (
@@ -18,7 +18,7 @@ export async function Footer() {
               <span className="font-pixel text-sm text-white">NIGHTBEAM STUDIO</span>
             </div>
             <p className="mt-4 max-w-md text-sm text-slate-400">
-              Story-driven Minecraft mods and worlds, crafted by Mahou. Home of <em>The Birth of Steve</em>.
+              Story-driven Minecraft mods and worlds, crafted by NightBeam Studio.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {socials.map((social) => (
@@ -58,10 +58,6 @@ export async function Footer() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-night-600/40 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} {env.APP_NAME}. All rights reserved.</p>
-          <p className="flex items-center gap-2">
-            <span aria-hidden className={`h-2 w-2 rounded-full ${backend === "postgres" ? "bg-pixel-green" : "bg-pixel-amber"}`} />
-            data backend: {backend === "postgres" ? "PostgreSQL" : "seeded in-memory fallback"}
-          </p>
         </div>
       </div>
     </footer>

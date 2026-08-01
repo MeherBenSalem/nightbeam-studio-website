@@ -23,7 +23,7 @@ export default async function CommunityPage() {
   const channels = [
     { name: "Discord", initial: "DC", url: community.discordUrl, stat: `${formatNumber(community.discordMembers)} members`, tone: "text-pixel-purple" },
     { name: "YouTube", initial: "YT", url: community.youtubeUrl, stat: `${formatNumber(community.youtubeSubscribers)} subscribers`, tone: "text-pixel-pink" },
-    { name: "GitHub", initial: "GH", url: community.githubUrl, stat: `${formatNumber(community.githubStars)} stars`, tone: "text-pixel-green" },
+    { name: "GitHub", initial: "GH", url: community.githubUrl, stat: "Repositories", tone: "text-pixel-green" },
   ];
 
   return (

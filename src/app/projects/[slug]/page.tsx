@@ -5,14 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/state";
 import { Tabs } from "@/components/ui/tabs";
-import { CommentsSection } from "@/components/projects/comments-section";
 import { DownloadButton, ProjectActions } from "@/components/projects/project-actions";
 import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
 import { ViewTracker } from "@/components/projects/view-tracker";
 import { requireUser } from "@/lib/auth/guards";
 import { getRepo } from "@/lib/db/repo";
 import { formatBytes, formatDate, formatNumber } from "@/lib/utils/format";
-import { renderMarkdown } from "@/lib/utils/markdown";
 
 export const revalidate = 60;
 
@@ -59,22 +57,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   };
 
   const tabs = [
-    {
-      id: "overview",
-      label: "Overview",
-      content: (
-        <div className="space-y-6">
-          <div className="nb-prose" dangerouslySetInnerHTML={{ __html: renderMarkdown(project.description) }} />
-          <div className="flex flex-wrap gap-1.5">
-            {project.tags.map((tag) => (
-              <span key={tag.slug} className="rounded border border-night-500/50 px-2 py-0.5 text-xs text-slate-400">
-                #{tag.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      ),
-    },
     {
       id: "downloads",
       label: "Downloads",
@@ -146,87 +128,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       ),
     },
     {
-      id: "screenshots",
-      label: "Screenshots",
+      id: "gallery",
+      label: "Gallery",
       content: <ScreenshotGallery screenshots={project.screenshots} />,
-    },
-    {
-      id: "changelog",
-      label: "Changelog",
-      content:
-        project.changelogs.length === 0 ? (
-          <EmptyState title="Changelog coming soon" body="Release notes will sync from CurseForge." />
-        ) : (
-          <div className="space-y-5">
-            {project.changelogs.map((entry) => (
-              <Card key={entry.id}>
-                <CardHeader>
-                  <CardTitle>{entry.title}</CardTitle>
-                  <span className="text-xs text-slate-500">{formatDate(entry.publishedAt)}</span>
-                </CardHeader>
-                <CardBody>
-                  <div className="nb-prose text-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(entry.content) }} />
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        ),
-    },
-    {
-      id: "documentation",
-      label: "Documentation",
-      content:
-        project.docs.length === 0 ? (
-          <EmptyState title="Documentation coming soon" />
-        ) : (
-          <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-            <nav aria-label="Documentation pages" className="space-y-1">
-              {project.docs.map((doc) => (
-                <a key={doc.id} href={`#doc-${doc.slug}`} className="block rounded-md px-3 py-2 text-sm text-slate-400 hover:bg-night-800 hover:text-white">
-                  {doc.title}
-                </a>
-              ))}
-            </nav>
-            <div className="space-y-8">
-              {project.docs.map((doc) => (
-                <article key={doc.id} id={`doc-${doc.slug}`} className="scroll-mt-24">
-                  <h3 className="font-pixel text-sm text-pixel-cyan">{doc.title}</h3>
-                  <div className="nb-prose mt-3" dangerouslySetInnerHTML={{ __html: renderMarkdown(doc.content) }} />
-                </article>
-              ))}
-            </div>
-          </div>
-        ),
-    },
-    {
-      id: "dependencies",
-      label: "Dependencies",
-      content:
-        project.dependencies.length === 0 ? (
-          <EmptyState title="No dependencies recorded" body="The Birth of Steve runs standalone — nothing else required." />
-        ) : (
-          <ul className="space-y-3">
-            {project.dependencies.map((dependency) => (
-              <li key={dependency.id} className="pixel-panel rounded-xl px-4 py-3">
-                <span className="font-medium text-white">{dependency.name}</span>
-                <Badge tone={dependency.required ? "purple" : "default"} className="ml-2">
-                  {dependency.required ? "Required" : "Optional"}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        ),
-    },
-    {
-      id: "comments",
-      label: "Comments",
-      content: (
-        <CommentsSection
-          slug={slug}
-          initial={project.comments.map((comment) => ({ ...comment, createdAt: comment.createdAt.toISOString() }))}
-          loggedIn={Boolean(user)}
-        />
-      ),
     },
   ];
 
@@ -279,7 +183,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         </div>
 
         <div className="mt-10">
-          <Tabs tabs={tabs} initialTab="overview" />
+          <Tabs tabs={tabs} initialTab="downloads" />
         </div>
       </div>
     </>

@@ -27,10 +27,10 @@ export async function runCurseForgeSync(): Promise<SyncStateDto> {
 
   try {
     const authorId = env.CURSEFORGE_AUTHOR_ID ? Number(env.CURSEFORGE_AUTHOR_ID) : null;
-    const mods = env.CURSEFORGE_SEARCH_TERM
-      ? await searchMods(env.CURSEFORGE_SEARCH_TERM)
-      : authorId && Number.isFinite(authorId)
-        ? await getAuthorMods(authorId)
+    const mods = authorId && Number.isFinite(authorId)
+      ? await getAuthorMods(authorId)
+      : env.CURSEFORGE_SEARCH_TERM
+        ? await searchMods(env.CURSEFORGE_SEARCH_TERM)
         : [];
     let synced = 0;
     for (const mod of mods) {

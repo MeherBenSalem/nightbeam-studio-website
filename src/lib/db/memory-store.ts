@@ -30,6 +30,7 @@ import type {
   UserDto,
 } from "@/lib/db/types";
 import { getServerEnv } from "@/lib/config/env";
+import { getYouTubeSubscribers } from "@/lib/youtube";
 
 export interface MemoryUserRecord {
   id: string;
@@ -389,10 +390,10 @@ export class MemoryDataStore {
     let items: ProjectSummary[] = [...this.projects.values()].map(toProjectSummary);
 
     if (filters.type) items = items.filter((p) => p.type === filters.type);
-    if (filters.version) items = items.filter((p) => p.minecraftVersions.includes(filters.version as string));
-    if (filters.loader) items = items.filter((p) => p.loaders.includes(filters.loader as never));
+    if (filters.versions?.length) items = items.filter((p) => p.minecraftVersions.some((v) => filters.versions!.includes(v)));
+    if (filters.loaders?.length) items = items.filter((p) => p.loaders.some((l) => filters.loaders!.includes(l)));
+    if (filters.categories?.length) items = items.filter((p) => p.categories.some((c) => filters.categories!.includes(c.slug)));
     if (filters.platform === "curseforge") items = items.filter((p) => Boolean(p.curseforgeId));
-    if (filters.category) items = items.filter((p) => p.categories.some((c) => c.slug === filters.category));
     if (filters.search) {
       const q = filters.search.toLowerCase();
       items = items.filter(
@@ -847,11 +848,12 @@ export function toProjectSummary(project: ProjectDetail): ProjectSummary {
   };
 }
 
-export function getCommunityStats(): CommunityStatsDto {
+export async function getCommunityStats(): Promise<CommunityStatsDto> {
   const env = getServerEnv();
+  const youtubeSubscribers = (await getYouTubeSubscribers()) ?? env.COMMUNITY_YOUTUBE_SUBSCRIBERS;
   return {
     discordMembers: env.COMMUNITY_DISCORD_MEMBERS,
-    youtubeSubscribers: env.COMMUNITY_YOUTUBE_SUBSCRIBERS,
+    youtubeSubscribers,
     githubStars: env.COMMUNITY_GITHUB_STARS,
     discordUrl: env.COMMUNITY_DISCORD_URL,
     youtubeUrl: env.COMMUNITY_YOUTUBE_URL,

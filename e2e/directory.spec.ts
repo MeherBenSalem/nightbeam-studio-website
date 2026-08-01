@@ -6,12 +6,12 @@ test("directory lists the seeded project", async ({ page }) => {
   await expect(page.getByRole("link", { name: /The Birth of Steve/ }).first()).toBeVisible();
 });
 
-test("loader filter updates the URL and stays shareable", async ({ page }) => {
+test("loader and version chips update the URL and stay shareable", async ({ page }) => {
   await page.goto("/projects");
-  await page.getByLabel("Filter by loader").selectOption("FABRIC");
-  await expect(page).toHaveURL(/loader=FABRIC/);
-  await page.getByLabel("Filter by Minecraft version").selectOption("26.2");
-  await expect(page).toHaveURL(/version=26\.2/);
+  await page.getByRole("button", { name: "Fabric", exact: true }).click();
+  await expect(page).toHaveURL(/loaders=FABRIC/);
+  await page.getByRole("button", { name: "26.2", exact: true }).click();
+  await expect(page).toHaveURL(/versions=26\.2/);
   await expect(page.getByRole("link", { name: /The Birth of Steve/ }).first()).toBeVisible();
 });
 

@@ -26,20 +26,20 @@ export const metadata: Metadata = {
     template: "%s · NightBeam Studio",
   },
   description:
-    "NightBeam Studio creates story-driven Minecraft mods. Home of The Birth of Steve by Mahou — available for Minecraft 26.1.2 & 26.2 on NeoForge and Fabric.",
-  keywords: ["NightBeam Studio", "The Birth of Steve", "Minecraft mod", "NeoForge", "Fabric", "Mahou"],
+    "NightBeam Studio crafts story-driven Minecraft mods and worlds. Explore the catalog, documentation, and community.",
+  keywords: ["NightBeam Studio", "Minecraft mods", "NeoForge", "Fabric", "Minecraft worlds"],
   openGraph: {
     type: "website",
     url: siteUrl,
     siteName: "NightBeam Studio",
     title: "NightBeam Studio — Game Mods & Worlds",
-    description: "Story-driven Minecraft mods by Mahou. Home of The Birth of Steve.",
+    description: "Story-driven Minecraft mods and worlds by NightBeam Studio.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "NightBeam Studio",
-    description: "Story-driven Minecraft mods by Mahou. Home of The Birth of Steve.",
+    description: "Story-driven Minecraft mods and worlds by NightBeam Studio.",
   },
   robots: { index: true, follow: true },
 };

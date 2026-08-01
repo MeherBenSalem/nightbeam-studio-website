@@ -89,10 +89,13 @@ export interface ProjectCommentDto {
 
 export interface ProjectFilters {
   type?: ProjectType;
-  version?: string;
-  loader?: Loader;
+  versions?: string[];
+  loaders?: Loader[];
+  categories?: string[];
   platform?: string;
   category?: string;
+  loader?: Loader;
+  version?: string;
   search?: string;
   sort?: "downloads" | "followers" | "views" | "updated" | "name" | "newest";
   page?: number;

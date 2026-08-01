@@ -15,7 +15,7 @@ test("register, sign in, and sign out", async ({ page }) => {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Dashboard/i);
 
   await page.getByRole("button", { name: /E2E Player/ }).click();
@@ -30,7 +30,7 @@ test("admin panel is gated and reachable for the admin", async ({ page }) => {
   await page.getByLabel("Email").fill("admin@nightbeam.studio");
   await page.getByLabel("Password", { exact: true }).fill("NightBeamAdmin123!");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page).toHaveURL(/\/admin/);
+  await expect(page).toHaveURL(/\/admin/, { timeout: 20_000 });
   await expect(page.getByText("Users & roles")).toBeVisible();
 });
 

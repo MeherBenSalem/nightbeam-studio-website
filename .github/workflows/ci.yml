@@ -79,4 +79,5 @@ jobs:
           AUTH_ADMIN_EMAIL: admin@nightbeam.studio
           AUTH_ADMIN_PASSWORD: NightBeamAdmin123!
           DEV_AUTO_VERIFY: "true"
+          SIGNUPS_ENABLED: "true"
           ANALYTICS_ENABLED: "false"

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s · NightBeam Studio",
   },
   description:
-    "NightBeam Studio crafts story-driven Minecraft mods and worlds. Explore the catalog, documentation, and community.",
+    "NightBeam Studio crafts story-driven Minecraft mods and worlds. Explore projects, documentation, and membership.",
   keywords: ["NightBeam Studio", "Minecraft mods", "NeoForge", "Fabric", "Minecraft worlds"],
   openGraph: {
     type: "website",

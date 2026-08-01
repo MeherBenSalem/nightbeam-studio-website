@@ -8,11 +8,24 @@ test("directory lists the seeded project", async ({ page }) => {
 
 test("loader and version chips update the URL and stay shareable", async ({ page }) => {
   await page.goto("/projects");
+  await page.getByRole("button", { name: /Filters/ }).click();
   await page.getByRole("button", { name: "Fabric", exact: true }).click();
   await expect(page).toHaveURL(/loaders=FABRIC/);
   await page.getByRole("button", { name: "26.2", exact: true }).click();
   await expect(page).toHaveURL(/versions=26\.2/);
   await expect(page.getByRole("link", { name: /The Birth of Steve/ }).first()).toBeVisible();
+});
+
+test("filters collapse and expand with active URL state", async ({ page }) => {
+  await page.goto("/projects");
+  const filters = page.getByRole("button", { name: /Filters/ });
+  await expect(filters).toHaveAttribute("aria-expanded", "false");
+  await filters.click();
+  await expect(filters).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("button", { name: "Fabric", exact: true }).click();
+  await expect(page).toHaveURL(/loaders=FABRIC/);
+  await expect(page.getByRole("button", { name: /Filters/ })).toContainText("1 active");
+  await expect(page.getByRole("button", { name: /Filters/ })).toHaveAttribute("aria-expanded", "true");
 });
 
 test("search input filters the list", async ({ page }) => {

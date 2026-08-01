@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { SearchIcon } from "@/components/icons";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/state";
 import { trackEventClient } from "@/lib/analytics/client";
@@ -76,18 +77,22 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
   return (
     <Dialog open={open} onClose={onClose} title="SEARCH PROJECTS" wide>
       <div className="space-y-3">
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setActiveIndex(0);
-          }}
-          onKeyDown={onKeyDown}
-          placeholder="Search mods, packs, tools…"
-          aria-label="Search projects"
-          className="w-full rounded-md border border-night-500/60 bg-night-950 px-4 py-3 text-base text-white placeholder:text-slate-500 focus:border-pixel-cyan/70 focus:outline-none"
-        />
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setActiveIndex(0);
+            }}
+            onKeyDown={onKeyDown}
+            placeholder="Search mods, packs, tools…"
+            aria-label="Search projects"
+            className="w-full rounded-lg border border-night-500/70 bg-night-950 px-4 py-3 pl-11 text-base text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] placeholder:text-slate-500 focus:border-pixel-cyan/80 focus:outline-none focus:ring-2 focus:ring-pixel-cyan/20"
+          />
+          {query ? <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs text-slate-500 hover:bg-night-800 hover:text-white">Clear</button> : null}
+        </div>
         {query.trim().length === 0 ? (
           <p className="py-6 text-center text-sm text-slate-500">Type to search the NightBeam catalog.</p>
         ) : isFetching ? (

@@ -20,7 +20,7 @@ const LINKS = [
   { href: "/projects", label: "Projects" },
   { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
-  { href: "/community", label: "Community" },
+  { href: "/community", label: "Membership" },
 ];
 
 export function Navbar({ user }: { user: NavUser | null }) {
@@ -28,7 +28,8 @@ export function Navbar({ user }: { user: NavUser | null }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-night-600/50 bg-night-950/85 backdrop-blur">
+    <>
+      <header className="sticky top-0 z-40 border-b border-night-600/50 bg-night-950/85 backdrop-blur">
       <nav aria-label="Main" className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
         <Link href="/" className="group flex items-center gap-2.5" aria-label="NightBeam Studio home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,12 +53,12 @@ export function Navbar({ user }: { user: NavUser | null }) {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="flex h-10 items-center gap-2 rounded-md border border-night-500/60 bg-night-900 px-3 text-sm text-slate-400 transition-colors hover:border-pixel-cyan/60 hover:text-white"
+            className="group flex h-10 min-w-0 items-center gap-2 rounded-lg border border-night-500/60 bg-night-900/80 px-3 text-sm text-slate-400 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] transition-colors hover:border-pixel-cyan/60 hover:bg-night-800 hover:text-white focus-visible:border-pixel-cyan/70"
             aria-label="Search projects"
           >
-            <SearchIcon />
-            <span className="hidden sm:inline">Search…</span>
-            <kbd className="hidden rounded border border-night-500/60 px-1.5 py-0.5 text-[10px] text-slate-500 md:inline">
+            <SearchIcon className="shrink-0 text-slate-500 group-hover:text-pixel-cyan" />
+            <span className="hidden truncate sm:inline">Search projects</span>
+            <kbd className="hidden rounded border border-night-500/60 bg-night-950 px-1.5 py-0.5 text-[10px] text-slate-500 md:inline">
               /
             </kbd>
           </button>
@@ -126,7 +127,9 @@ export function Navbar({ user }: { user: NavUser | null }) {
         </div>
       </div>
 
+      </header>
+
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </header>
+    </>
   );
 }

@@ -179,10 +179,10 @@ export const SEED_ANNOUNCEMENTS = [
 ] as const;
 
 export const SEED_SECTIONS = [
-  { key: "hero", title: "Featured release", subtitle: "The Birth of Steve — v0.4.0", enabled: true, sortOrder: 0 },
-  { key: "featured-projects", title: "Featured projects", subtitle: null, enabled: true, sortOrder: 1 },
-  { key: "stats", title: "Community numbers", subtitle: null, enabled: true, sortOrder: 2 },
-  { key: "community", title: "Join the community", subtitle: null, enabled: true, sortOrder: 3 },
+  { key: "hero", title: "Featured release", subtitle: "The Birth of Steve — v0.4.0", enabled: true, sortOrder: 0, content: null },
+  { key: "featured-projects", title: "Featured projects", subtitle: null, enabled: true, sortOrder: 1, content: null },
+  { key: "stats", title: "Community numbers", subtitle: null, enabled: true, sortOrder: 2, content: null },
+  { key: "community", title: "Join the community", subtitle: null, enabled: true, sortOrder: 3, content: null },
 ] as const;
 
 export const SEED_SOCIALS = [

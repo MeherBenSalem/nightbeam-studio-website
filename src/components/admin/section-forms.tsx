@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteSocialAction, upsertSectionAction, upsertSocialAction } from "@/lib/admin/actions";
+import { deleteSocialAction, saveHomepageVideoAction, upsertSectionAction, upsertSocialAction } from "@/lib/admin/actions";
 import type { ActionState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Checkbox, Input, Label } from "@/components/ui/input";
@@ -33,6 +33,29 @@ export function SectionForm({ section }: { section: HomeSectionDto }) {
         Save
       </Button>
       {state.message ? <span className="text-xs text-green-400">{state.message}</span> : null}
+    </form>
+  );
+}
+
+export function HomepageVideoForm({ section }: { section: HomeSectionDto | null }) {
+  const [state, action, pending] = useActionState(async (_prev: ActionState, formData: FormData) => saveHomepageVideoAction(formData), {});
+  const savedVideo = typeof section?.content?.youtubeVideoId === "string" ? section.content.youtubeVideoId : "";
+
+  return (
+    <form action={action} className="pixel-panel rounded-xl p-4">
+      <div>
+        <h3 className="font-pixel text-xs text-pixel-cyan">Homepage video</h3>
+        <p className="mt-2 text-sm text-slate-400">Set a YouTube video URL or ID. Leave it empty to use the configured/latest channel video.</p>
+      </div>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1">
+          <Label htmlFor="homepage-video-id">YouTube URL or video ID</Label>
+          <Input id="homepage-video-id" name="videoId" defaultValue={savedVideo} placeholder="https://youtu.be/…" />
+        </div>
+        <Button type="submit" size="sm" disabled={pending}>{pending ? "Saving…" : "Save video"}</Button>
+      </div>
+      {state.error ? <p className="mt-3 text-xs text-red-300">{state.error}</p> : null}
+      {state.message ? <p className="mt-3 text-xs text-green-400">{state.message}</p> : null}
     </form>
   );
 }

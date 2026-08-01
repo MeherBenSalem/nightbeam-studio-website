@@ -1,73 +1,87 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/card";
 import { PixelHeading } from "@/components/ui/pixel-heading";
-import { getRepo } from "@/lib/db/repo";
-import { formatNumber } from "@/lib/utils/format";
 
 export const metadata: Metadata = {
-  title: "Community",
-  description: "Join the NightBeam Studio community on Discord, YouTube, and GitHub.",
+  title: "Membership",
+  description: "Choose a free or Pro NightBeam Studio membership.",
 };
 
-const RULES = [
-  "Be kind — this is a small studio and every player matters.",
-  "Report bugs with version, loader, and what you were doing.",
-  "Share screenshots and stories; credit the mod when posting elsewhere.",
-  "No pirated copies, no harassment, no spoilers outside spoiler channels.",
+const FREE_BENEFITS = [
+  "Browse and download public releases",
+  "Standard Discord community access",
+  "Follow and favorite projects",
+  "Community and release updates",
 ];
 
-export default async function CommunityPage() {
-  const repo = await getRepo();
-  const community = await repo.getCommunityStats();
+const PRO_BENEFITS = [
+  "Priority Discord support",
+  "Dedicated support agent",
+  "Early access to upcoming versions and projects",
+  "Discord Premium Role",
+  "Discord Premium Badge",
+];
 
-  const channels = [
-    { name: "Discord", initial: "DC", url: community.discordUrl, stat: `${formatNumber(community.discordMembers)} members`, tone: "text-pixel-purple" },
-    { name: "YouTube", initial: "YT", url: community.youtubeUrl, stat: `${formatNumber(community.youtubeSubscribers)} subscribers`, tone: "text-pixel-pink" },
-    { name: "GitHub", initial: "GH", url: community.githubUrl, stat: "Repositories", tone: "text-pixel-green" },
-  ];
-
+export default function CommunityPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-      <PixelHeading as="h1">Community</PixelHeading>
+      <PixelHeading as="h1">Membership</PixelHeading>
       <p className="mt-4 max-w-2xl text-slate-400">
-        The Birth of Steve is a story told together. Join the conversation, share your playthrough, and help shape what
-        comes next.
+        Choose the level of NightBeam access that fits you. Everyone is welcome, and Pro members will get closer support
+        and early looks as the studio grows.
       </p>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-3">
-        {channels.map((channel) => (
-          <a key={channel.name} href={channel.url} target="_blank" rel="noopener noreferrer" className="pixel-panel group rounded-xl p-6 text-center transition-colors hover:border-pixel-cyan/60">
-            <div className={`font-pixel text-3xl ${channel.tone}`}>{channel.initial}</div>
-            <div className="mt-3 font-semibold text-white group-hover:text-pixel-cyan">{channel.name}</div>
-            <div className="mt-1 text-sm text-slate-500">{channel.stat}</div>
-          </a>
-        ))}
-      </div>
+      <section className="mt-10 grid gap-5 md:grid-cols-2" aria-label="Membership tiers">
+        <Card className="flex flex-col p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="font-pixel text-xs text-pixel-cyan">FREE</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">NightBeam Free</h2>
+            </div>
+            <p className="font-pixel text-xl text-white">$0</p>
+          </div>
+          <p className="mt-4 text-sm text-slate-400">The essentials for exploring NightBeam and joining the conversation.</p>
+          <ul className="mt-6 space-y-3 text-sm text-slate-300">
+            {FREE_BENEFITS.map((benefit) => (
+              <li key={benefit} className="flex gap-3"><span className="text-pixel-cyan">✓</span><span>{benefit}</span></li>
+            ))}
+          </ul>
+          <Link href="/auth/register" className="mt-8 inline-flex h-10 items-center justify-center rounded-md border border-night-500/70 bg-night-900 px-4 text-sm font-medium text-white transition-colors hover:border-pixel-cyan/60">
+            Create Free Account
+          </Link>
+        </Card>
 
-      <section className="mt-12" aria-labelledby="rules-heading">
-        <PixelHeading as="h2" id="rules-heading">House rules</PixelHeading>
-        <Card className="mt-6">
-          <CardBody>
-            <ul className="space-y-3">
-              {RULES.map((rule, index) => (
-                <li key={rule} className="flex gap-3 text-sm text-slate-300">
-                  <span className="font-pixel text-xs text-pixel-cyan">{String(index + 1).padStart(2, "0")}</span>
-                  <span>{rule}</span>
-                </li>
-              ))}
-            </ul>
-          </CardBody>
+        <Card className="relative flex flex-col border-white/50 p-6">
+          <span className="absolute right-5 top-5 rounded-full border border-white/40 px-2.5 py-1 text-[10px] uppercase tracking-widest text-slate-300">Coming soon</span>
+          <div>
+            <div>
+              <p className="font-pixel text-xs text-pixel-purple">PRO</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">NightBeam Pro</h2>
+            </div>
+          </div>
+          <p className="mt-4 font-pixel text-xl text-white">$2<span className="text-xs text-slate-500">/month</span></p>
+          <p className="mt-4 text-sm text-slate-400">Extra support and first access for the players closest to the studio.</p>
+          <ul className="mt-6 space-y-3 text-sm text-slate-300">
+            {PRO_BENEFITS.map((benefit) => (
+              <li key={benefit} className="flex gap-3"><span className="text-pixel-purple">✦</span><span>{benefit}</span></li>
+            ))}
+          </ul>
+          <button type="button" disabled aria-disabled="true" className="mt-8 inline-flex h-10 items-center justify-center rounded-md border border-night-500/60 bg-night-900 px-4 text-sm font-medium text-slate-500">
+            Pro membership coming soon
+          </button>
         </Card>
       </section>
 
-      <section className="mt-12">
-        <Card className="p-6">
-          <h2 className="font-pixel text-sm text-pixel-cyan">FIND US</h2>
+      <Card className="mt-8">
+        <CardBody>
+          <h2 className="font-pixel text-sm text-pixel-cyan">A clear path forward</h2>
           <p className="mt-3 text-sm text-slate-400">
-            The fastest way to get help is the Discord server — the studio reads every message.
+            Start free today. When Pro opens, existing members will have a simple way to upgrade without losing their
+            account or project follows.
           </p>
-        </Card>
-      </section>
+        </CardBody>
+      </Card>
     </div>
   );
 }

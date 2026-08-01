@@ -242,6 +242,7 @@ export interface HomeSectionDto {
   subtitle: string | null;
   enabled: boolean;
   sortOrder: number;
+  content: Record<string, unknown> | null;
 }
 
 export interface SocialLinkDto {

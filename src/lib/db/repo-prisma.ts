@@ -39,6 +39,21 @@ function requireDb(): NonNullable<ReturnType<typeof getPrisma>> {
   return prisma;
 }
 
+function mapHomeSection(row: {
+  id: string;
+  key: string;
+  title: string;
+  subtitle: string | null;
+  enabled: boolean;
+  sortOrder: number;
+  content: Prisma.JsonValue | null;
+}): HomeSectionDto {
+  const content = row.content && typeof row.content === "object" && !Array.isArray(row.content)
+    ? (row.content as Record<string, unknown>)
+    : null;
+  return { id: row.id, key: row.key, title: row.title, subtitle: row.subtitle, enabled: row.enabled, sortOrder: row.sortOrder, content };
+}
+
 function toUserDto(row: {
   id: string;
   name: string | null;
@@ -320,7 +335,7 @@ export const prismaRepo: DataRepo = {
       where: { enabled: true },
       orderBy: { sortOrder: "asc" },
     });
-    return rows.map((row) => ({ id: row.id, key: row.key, title: row.title, subtitle: row.subtitle, enabled: row.enabled, sortOrder: row.sortOrder }));
+    return rows.map(mapHomeSection);
   },
 
   async getSocialLinks(): Promise<SocialLinkDto[]> {
@@ -917,15 +932,15 @@ export const prismaRepo: DataRepo = {
   async listAllSections(): Promise<HomeSectionDto[]> {
     const prisma = requireDb();
     const rows = await prisma.homeSection.findMany({ orderBy: { sortOrder: "asc" } });
-    return rows.map((row) => ({ id: row.id, key: row.key, title: row.title, subtitle: row.subtitle, enabled: row.enabled, sortOrder: row.sortOrder }));
+    return rows.map(mapHomeSection);
   },
 
   async upsertSection(input) {
     const prisma = requireDb();
     await prisma.homeSection.upsert({
       where: { key: input.key },
-      create: { key: input.key, title: input.title, subtitle: input.subtitle, enabled: input.enabled, sortOrder: input.sortOrder },
-      update: { title: input.title, subtitle: input.subtitle, enabled: input.enabled, sortOrder: input.sortOrder },
+      create: { key: input.key, title: input.title, subtitle: input.subtitle, enabled: input.enabled, sortOrder: input.sortOrder, content: input.content ? (input.content as Prisma.InputJsonValue) : Prisma.DbNull },
+      update: { title: input.title, subtitle: input.subtitle, enabled: input.enabled, sortOrder: input.sortOrder, content: input.content ? (input.content as Prisma.InputJsonValue) : Prisma.DbNull },
     });
   },
 

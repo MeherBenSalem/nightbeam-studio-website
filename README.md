@@ -21,8 +21,8 @@ The site was built in six phases, each ending with green
 | Phase | Scope | Status |
 | --- | --- | --- |
 | 0 | Foundation: repo, scaffold, Prisma/Postgres/Redis wiring, Docker, CI, design system, shell layout | done |
-| 1 | CurseForge client + cache + sync worker, fallback catalog, homepage hero/stats/featured/community | done |
-| 2 | `/projects` directory (filters, search, URL state, grid/list) + project pages (8 tabs, downloads, gallery) | done |
+| 1 | CurseForge client + cache + sync worker, fallback catalog, homepage hero/stats/featured/membership | done |
+| 2 | `/projects` directory (filters, search, URL state, grid/list) + project pages (versions, downloads, gallery) | done |
 | 3 | Auth.js credentials + OAuth, verification/reset, rate limiting, dashboard, notifications + digests | done |
 | 4 | RBAC admin panel, overrides, announcements, sync/cache controls, self-hosted analytics | done |
 | 5 | Accessibility pass, SEO/OG/JSON-LD, Playwright smoke suite, deployment docs | done |

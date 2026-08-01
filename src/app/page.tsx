@@ -8,6 +8,7 @@ import { PixelHeading } from "@/components/ui/pixel-heading";
 import { StatCounter } from "@/components/ui/stat-counter";
 import { getRepo } from "@/lib/db/repo";
 import { getLatestVideoId } from "@/lib/youtube";
+import { selectHomepageVideoId } from "@/lib/utils/youtube";
 import { formatNumber } from "@/lib/utils/format";
 
 export const revalidate = 60;
@@ -21,7 +22,9 @@ export default async function HomePage() {
     repo.getCommunityStats(),
     repo.getEnabledSections(),
   ]);
-  const videoId = await getLatestVideoId();
+  const heroSection = sections.find((section) => section.key === "hero");
+  const configuredVideoId = typeof heroSection?.content?.youtubeVideoId === "string" ? heroSection.content.youtubeVideoId : null;
+  const videoId = selectHomepageVideoId(configuredVideoId, await getLatestVideoId());
 
   const sectionsEnabled = new Set(sections.map((section) => section.key));
   const heroProject = projects[0];
@@ -79,9 +82,9 @@ export default async function HomePage() {
         <section className="border-y border-night-600/40 bg-night-900/50">
           <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
             <StatCounter value={stats.downloads} label="Downloads" accent="cyan" />
-            <StatCounter value={stats.followers} label="Followers" accent="purple" />
-            <StatCounter value={stats.views} label="Views" accent="blue" />
+            <StatCounter value={stats.versions} label="Versions" accent="purple" />
             <StatCounter value={stats.projects} label="Projects" accent="green" />
+            <StatCounter value={community.discordMembers} label="Discord Members" accent="blue" />
           </div>
         </section>
       ) : null}
@@ -124,20 +127,27 @@ export default async function HomePage() {
                 <Link href="/about">More about us</Link>
               </Button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <a href={community.discordUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel rounded-xl p-5 text-center transition-colors hover:border-pixel-cyan/60">
-                <div className="font-pixel text-2xl text-pixel-purple">DC</div>
-                <div className="mt-2 text-sm font-medium text-white">Discord</div>
-                <div className="text-xs text-slate-500">{formatNumber(community.discordMembers)} members</div>
+            <div className="grid items-start gap-3 sm:grid-cols-3">
+              <a href={community.discordUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel group flex items-center gap-3 rounded-xl p-4 transition-colors hover:border-pixel-cyan/60">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-night-500/60 bg-night-900 font-pixel text-sm text-pixel-purple">DC</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-white group-hover:text-pixel-cyan">Discord</span>
+                  <span className="block text-xs text-slate-500">{formatNumber(community.discordMembers)} members</span>
+                </span>
               </a>
-              <a href={community.youtubeUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel rounded-xl p-5 text-center transition-colors hover:border-pixel-cyan/60">
-                <div className="font-pixel text-2xl text-pixel-pink">YT</div>
-                <div className="mt-2 text-sm font-medium text-white">YouTube</div>
-                <div className="text-xs text-slate-500">{formatNumber(community.youtubeSubscribers)} subscribers</div>
+              <a href={community.youtubeUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel group flex items-center gap-3 rounded-xl p-4 transition-colors hover:border-pixel-cyan/60">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-night-500/60 bg-night-900 font-pixel text-sm text-pixel-pink">YT</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-white group-hover:text-pixel-cyan">YouTube</span>
+                  <span className="block text-xs text-slate-500">{formatNumber(community.youtubeSubscribers)} subscribers</span>
+                </span>
               </a>
-              <a href={community.githubUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel rounded-xl p-5 text-center transition-colors hover:border-pixel-cyan/60">
-                <div className="font-pixel text-2xl text-pixel-green">GH</div>
-                <div className="mt-2 text-sm font-medium text-white">GitHub</div>
+              <a href={community.githubUrl} target="_blank" rel="noopener noreferrer" className="pixel-panel group flex items-center gap-3 rounded-xl p-4 transition-colors hover:border-pixel-cyan/60">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-night-500/60 bg-night-900 font-pixel text-sm text-pixel-green">GH</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-white group-hover:text-pixel-cyan">GitHub</span>
+                  <span className="block text-xs text-slate-500">View repositories</span>
+                </span>
               </a>
             </div>
           </div>

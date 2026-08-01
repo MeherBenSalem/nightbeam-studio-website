@@ -1,6 +1,6 @@
 import { requirePermission } from "@/lib/auth/guards";
 import { getRepo } from "@/lib/db/repo";
-import { SectionForm, SocialForm } from "@/components/admin/section-forms";
+import { HomepageVideoForm, SectionForm, SocialForm } from "@/components/admin/section-forms";
 
 export default async function AdminSectionsPage() {
   const user = await requirePermission("sections.manage");
@@ -13,6 +13,9 @@ export default async function AdminSectionsPage() {
       <div>
         <h2 className="font-semibold text-white">Homepage sections</h2>
         <p className="mt-2 text-sm text-slate-400">Toggle sections and edit their titles.</p>
+        <div className="mt-4">
+          <HomepageVideoForm section={sections.find((section) => section.key === "hero") ?? null} />
+        </div>
         <div className="mt-4 space-y-4">
           {sections.map((section) => (
             <SectionForm key={section.key} section={section} />

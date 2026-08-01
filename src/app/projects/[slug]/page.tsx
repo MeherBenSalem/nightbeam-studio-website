@@ -58,19 +58,22 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   const tabs = [
     {
-      id: "downloads",
-      label: "Downloads",
+      id: "versions",
+      label: "Versions",
       content: (
         <div className="space-y-5">
           {project.versions.length === 0 ? (
-            <EmptyState title="No downloads yet" body="Files will appear once CurseForge sync is live." />
+            <EmptyState title="No versions yet" body="Versions and files will appear once CurseForge sync is live." />
           ) : (
             project.versions.map((version) => (
               <Card key={version.id}>
                 <CardHeader>
-                  <CardTitle>v{version.version}</CardTitle>
+                  <div>
+                    <CardTitle>v{version.version}</CardTitle>
+                    <p className="mt-1 text-xs text-slate-500">{version.minecraftVersions.join(", ")} · {version.loaders.join(", ")} · {formatDate(version.releaseDate)}</p>
+                  </div>
                   <Badge tone={version.releaseType === "ALPHA" ? "amber" : version.releaseType === "BETA" ? "blue" : "green"}>
-                    {version.releaseType}
+                    {version.isLatest ? "LATEST" : version.releaseType}
                   </Badge>
                 </CardHeader>
                 <CardBody>
@@ -91,39 +94,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               </Card>
             ))
           )}
-        </div>
-      ),
-    },
-    {
-      id: "versions",
-      label: "Versions",
-      content: (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-130 text-left text-sm">
-            <thead>
-              <tr className="border-b border-night-600/50 text-xs uppercase tracking-wide text-slate-500">
-                <th scope="col" className="px-3 py-2">Version</th>
-                <th scope="col" className="px-3 py-2">Minecraft</th>
-                <th scope="col" className="px-3 py-2">Loaders</th>
-                <th scope="col" className="px-3 py-2">Type</th>
-                <th scope="col" className="px-3 py-2">Released</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-night-600/40">
-              {project.versions.map((version) => (
-                <tr key={version.id}>
-                  <td className="px-3 py-3 font-semibold text-white">
-                    v{version.version}
-                    {version.isLatest ? <Badge tone="cyan" className="ml-2">Latest</Badge> : null}
-                  </td>
-                  <td className="px-3 py-3 text-slate-300">{version.minecraftVersions.join(", ")}</td>
-                  <td className="px-3 py-3 text-slate-300">{version.loaders.join(", ")}</td>
-                  <td className="px-3 py-3 text-slate-300">{version.releaseType}</td>
-                  <td className="px-3 py-3 text-slate-400">{formatDate(version.releaseDate)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       ),
     },
@@ -183,7 +153,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         </div>
 
         <div className="mt-10">
-          <Tabs tabs={tabs} initialTab="downloads" />
+          <Tabs tabs={tabs} initialTab="versions" />
         </div>
       </div>
     </>

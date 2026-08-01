@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-test("project page shows tabs and version data", async ({ page }) => {
+test("project page shows versions and gallery data", async ({ page }) => {
   await page.goto("/projects/the-birth-of-steve");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("THE BIRTH OF STEVE");
-  await expect(page.getByRole("tab", { name: "Downloads" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "Downloads" })).toHaveCount(0);
+  await expect(page.getByRole("tab", { name: "Versions" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText("the-birth-of-steve-0.4.0-neoforge.jar")).toBeVisible();
-  await page.getByRole("tab", { name: "Versions" }).click();
-  await expect(page.getByRole("cell", { name: /0\.4\.0/ })).toBeVisible();
+  await expect(page.getByText("v0.4.0").first()).toBeVisible();
   await page.getByRole("tab", { name: "Gallery" }).click();
   await expect(page.getByRole("tab", { name: "Gallery" })).toHaveAttribute("aria-selected", "true");
 });

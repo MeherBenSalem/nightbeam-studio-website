@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GridIcon, ListIcon, SearchIcon } from "@/components/icons";
+import { ChevronDownIcon, GridIcon, ListIcon, SearchIcon } from "@/components/icons";
 import { LOADERS, MC_VERSIONS, PROJECT_TYPES, SORTS, serializeFilterParams } from "@/lib/utils/url-filters";
 import type { ProjectFilters, ProjectType } from "@/lib/db/types";
 import { cn } from "@/lib/utils/cn";
@@ -19,6 +19,13 @@ export function FilterBar({
   const router = useRouter();
   const pathname = usePathname();
   const [search, setSearch] = useState(filters.search ?? "");
+  const activeCount =
+    (filters.type ? 1 : 0) +
+    (filters.loaders?.length ?? 0) +
+    (filters.versions?.length ?? 0) +
+    (filters.categories?.length ?? 0) +
+    (filters.search ? 1 : 0);
+  const [filtersOpen, setFiltersOpen] = useState(activeCount > 0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,13 +48,6 @@ export function FilterBar({
   function clearAll() {
     router.replace(pathname, { scroll: false });
   }
-
-  const activeCount =
-    (filters.type ? 1 : 0) +
-    (filters.loaders?.length ?? 0) +
-    (filters.versions?.length ?? 0) +
-    (filters.categories?.length ?? 0) +
-    (filters.search ? 1 : 0);
 
   const chip = (active: boolean) =>
     cn(
@@ -107,7 +107,22 @@ export function FilterBar({
         </div>
       </div>
 
-      <div className="mt-5">
+      <button
+        type="button"
+        onClick={() => setFiltersOpen((open) => !open)}
+        aria-expanded={filtersOpen}
+        aria-controls="project-filter-options"
+        className="mt-5 flex w-full items-center justify-between rounded-lg border border-night-500/60 bg-night-900/70 px-3 py-2.5 text-left text-xs uppercase tracking-wide text-slate-300 transition-colors hover:border-pixel-cyan/60 hover:text-white"
+      >
+        <span className="flex items-center gap-2">
+          Filters
+          {activeCount > 0 ? <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-black">{activeCount} active</span> : null}
+        </span>
+        <ChevronDownIcon className={cn("transition-transform", filtersOpen && "rotate-180")} />
+      </button>
+
+      {filtersOpen ? <div id="project-filter-options" className="mt-4">
+      <div>
         <span className="text-xs uppercase tracking-wide text-slate-500">Type</span>
         <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Project type">
           <button type="button" onClick={() => update({ type: undefined })} aria-pressed={!filters.type} className={chip(!filters.type)}>
@@ -198,6 +213,7 @@ export function FilterBar({
           </button>
         ) : null}
       </div>
+      </div> : null}
     </div>
   );
 }

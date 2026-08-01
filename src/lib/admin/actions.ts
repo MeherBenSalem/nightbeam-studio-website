@@ -6,6 +6,7 @@ import { requirePermission } from "@/lib/auth/guards";
 import { flushAllCaches } from "@/lib/curseforge/cache";
 import { getRepo } from "@/lib/db/repo";
 import type { ActionState } from "@/lib/auth/actions";
+import { normalizeYouTubeVideoId } from "@/lib/utils/youtube";
 
 export async function setUserRoleAction(formData: FormData): Promise<ActionState> {
   const actor = await requirePermission("roles.manage");
@@ -105,10 +106,54 @@ export async function upsertSectionAction(formData: FormData): Promise<ActionSta
   if (!key || title.length < 2) return { error: "Key and title are required" };
   const repo = await getRepo();
   const existing = (await repo.listAllSections()).find((section) => section.key === key);
-  await repo.upsertSection({ id: existing?.id ?? `section-${key}`, key, title, subtitle, enabled, sortOrder: existing?.sortOrder ?? 99 });
+  await repo.upsertSection({
+    id: existing?.id ?? `section-${key}`,
+    key,
+    title,
+    subtitle,
+    enabled,
+    sortOrder: existing?.sortOrder ?? 99,
+    content: existing?.content ?? null,
+  });
   await repo.logAudit({ actorId: actor.id, action: "section.update", targetType: "section", targetId: key });
   revalidatePath("/admin/sections");
   return { ok: true };
+}
+
+export async function saveHomepageVideoAction(formData: FormData): Promise<ActionState> {
+  const actor = await requirePermission("sections.manage");
+  if (!actor) return { error: "Forbidden" };
+
+  const rawVideo = String(formData.get("videoId") ?? "").trim();
+  const videoId = normalizeYouTubeVideoId(rawVideo);
+  if (rawVideo && !videoId) return { error: "Enter a valid YouTube video URL or 11-character video ID." };
+
+  const repo = await getRepo();
+  const sections = await repo.listAllSections();
+  const existing = sections.find((section) => section.key === "hero");
+  const content = { ...(existing?.content ?? {}) };
+  if (videoId) content.youtubeVideoId = videoId;
+  else delete content.youtubeVideoId;
+
+  await repo.upsertSection({
+    id: existing?.id ?? "section-hero",
+    key: "hero",
+    title: existing?.title ?? "Featured release",
+    subtitle: existing?.subtitle ?? null,
+    enabled: existing?.enabled ?? true,
+    sortOrder: existing?.sortOrder ?? 0,
+    content,
+  });
+  await repo.logAudit({
+    actorId: actor.id,
+    action: videoId ? "homepage.video_update" : "homepage.video_clear",
+    targetType: "section",
+    targetId: "hero",
+    details: videoId ? { videoId } : null,
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/sections");
+  return { ok: true, message: videoId ? "Homepage video saved." : "Homepage video cleared; automatic selection restored." };
 }
 
 export async function upsertAnnouncementAction(formData: FormData): Promise<ActionState> {

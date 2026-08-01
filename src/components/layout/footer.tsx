@@ -41,7 +41,7 @@ export async function Footer() {
               <li><Link className="text-slate-400 hover:text-white" href="/projects">Projects</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/docs">Documentation</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/about">About</Link></li>
-              <li><Link className="text-slate-400 hover:text-white" href="/community">Community</Link></li>
+              <li><Link className="text-slate-400 hover:text-white" href="/community">Membership</Link></li>
             </ul>
           </nav>
 

@@ -8,6 +8,8 @@ export const contentType = "image/png";
 
 export default async function OgImage() {
   const fontData = await readFile(join(process.cwd(), "src/assets/fonts/Monocraft.ttf"));
+  const logoData = await readFile(join(process.cwd(), "public/nb-logo.png"));
+  const logoSrc = `data:image/png;base64,${logoData.toString("base64")}`;
   return new ImageResponse(
     (
       <div
@@ -25,21 +27,8 @@ export default async function OgImage() {
         }}
       >
         <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 48 }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #2e2e2e, #f5f5f5)",
-              fontSize: 28,
-              color: "#ffffff",
-            }}
-          >
-            NB
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} alt="" width={56} height={56} style={{ borderRadius: 12, objectFit: "contain" }} />
           <div style={{ fontSize: 28, letterSpacing: 4, color: "#ffffff" }}>NIGHTBEAM STUDIO</div>
         </div>
         <div style={{ fontSize: 58, lineHeight: 1.3, color: "#ffffff", display: "flex", flexDirection: "column" }}>

@@ -20,5 +20,5 @@ test("keyboard navigation reaches every primary nav item", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(nav.getByRole("link", { name: "About" })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(nav.getByRole("link", { name: "Community" })).toBeFocused();
+  await expect(nav.getByRole("link", { name: "Membership" })).toBeFocused();
 });

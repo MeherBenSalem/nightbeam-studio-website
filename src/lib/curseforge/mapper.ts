@@ -71,7 +71,7 @@ function loadersFromFile(file: CfFile): Loader[] {
 
 function deriveVersion(file: CfFile): string {
   for (const candidate of [file.displayName, file.fileName]) {
-    const match = candidate?.match(/(\d+\.\d+(?:\.\d+)?(?:[-+][a-zA-Z0-9.-]+)?)/);
+    const match = candidate?.match(/(0\.\d+(?:\.\d+)?(?:[-+][a-zA-Z0-9.-]+)?)/);
     if (match) return match[1];
   }
   return file.displayName ?? file.fileName;

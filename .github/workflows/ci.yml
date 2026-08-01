@@ -10,8 +10,8 @@ jobs:
     name: Typecheck · lint · tests · build · compose
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -49,8 +49,8 @@ jobs:
       DATABASE_URL: postgresql://nightbeam:nightbeam@localhost:5432/nightbeam?schema=public
       TEST_DATABASE_URL: postgresql://nightbeam:nightbeam@localhost:5432/nightbeam?schema=public
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -64,8 +64,8 @@ jobs:
     name: Playwright smoke tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm

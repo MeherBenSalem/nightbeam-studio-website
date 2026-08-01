@@ -150,7 +150,7 @@ export const prismaRepo: DataRepo = {
 
   async upsertCurseForgeProject(detail) {
     const prisma = requireDb();
-    const projectId = detail.id;
+    const desiredId = detail.id;
     const baseData = {
       slug: detail.slug,
       name: detail.name,
@@ -173,11 +173,12 @@ export const prismaRepo: DataRepo = {
       lastSyncedAt: new Date(),
     };
     await prisma.$transaction(async (tx) => {
-      await tx.project.upsert({
+      const projectRow = await tx.project.upsert({
         where: { slug: detail.slug },
-        create: { id: projectId, ...baseData },
+        create: { id: desiredId, ...baseData },
         update: baseData,
       });
+      const projectId = projectRow.id;
       await tx.projectCategory.deleteMany({ where: { projectId } });
       for (const category of detail.categories) {
         const row = await tx.category.upsert({

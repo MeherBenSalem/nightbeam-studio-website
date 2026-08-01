@@ -1,0 +1,86 @@
+import type { CfMod } from "@/lib/curseforge/types";
+
+// Fixture shaped like a real CurseForge API v1 response, used by unit
+// tests for the mapper. Values are realistic but not live data.
+export const FIXTURE_MOD: CfMod = {
+  id: 987654,
+  gameId: 432,
+  name: "The Birth of Steve",
+  slug: "the-birth-of-steve",
+  summary: "A story-driven Minecraft mod exploring the origin of Steve.",
+  description: "<p>Seeded fixture description.</p>",
+  links: {
+    websiteUrl: "https://www.curseforge.com/minecraft/mc-mods/the-birth-of-steve",
+    sourceUrl: "https://github.com/MeherBenSalem",
+    issuesUrl: null as unknown as string,
+  },
+  authors: [{ name: "Mahou", url: "https://www.curseforge.com/members/mahou" }],
+  logo: { url: "https://media.forgecdn.net/avatars/1/logo.png", thumbnailUrl: "https://media.forgecdn.net/avatars/1/thumb.png" },
+  screenshots: [
+    {
+      id: 1,
+      modId: 987654,
+      title: "The origin",
+      description: "A screenshot",
+      thumbnailUrl: "https://media.forgecdn.net/screenshots/1/thumb.png",
+      url: "https://media.forgecdn.net/screenshots/1/full.png",
+    },
+  ],
+  mainFileId: 555,
+  latestFiles: [
+    {
+      id: 555,
+      modId: 987654,
+      isAvailable: true,
+      displayName: "0.4.0",
+      fileName: "the-birth-of-steve-0.4.0-neoforge.jar",
+      releaseType: 1,
+      fileStatus: 4,
+      fileDate: "2026-01-12T00:00:00Z",
+      fileLength: 4_812_000,
+      downloadCount: 7042,
+      downloadUrl: "https://edge.forgecdn.net/files/1/2/3.jar",
+      gameVersions: ["26.1.2", "26.2", "NeoForge"],
+      sortableGameVersion: [
+        { gameVersion: "26.1.2", gameVersionName: "Minecraft 26.1.2", gameVersionType: "Minecraft" },
+        { gameVersion: "NeoForge", gameVersionType: "NeoForge" },
+      ],
+      hashes: [{ value: "abc123", algo: 1 }],
+    },
+    {
+      id: 556,
+      modId: 987654,
+      isAvailable: true,
+      displayName: "0.4.0",
+      fileName: "the-birth-of-steve-0.4.0-fabric.jar",
+      releaseType: 1,
+      fileStatus: 4,
+      fileDate: "2026-01-12T00:00:00Z",
+      fileLength: 4_655_000,
+      downloadCount: 5798,
+      downloadUrl: "https://edge.forgecdn.net/files/4/5/6.jar",
+      gameVersions: ["26.1.2", "Fabric"],
+      sortableGameVersion: [
+        { gameVersion: "26.1.2", gameVersionName: "Minecraft 26.1.2", gameVersionType: "Minecraft" },
+        { gameVersion: "Fabric", gameVersionType: "Fabric" },
+      ],
+      hashes: [{ value: "def456", algo: 1 }],
+    },
+  ],
+  latestFilesIndexes: [
+    { gameVersion: "26.1.2", fileId: 555, filename: "the-birth-of-steve-0.4.0-neoforge.jar", releaseType: 1, modLoader: "NeoForge" },
+  ],
+  dateCreated: "2025-06-01T00:00:00Z",
+  dateModified: "2026-01-12T00:00:00Z",
+  dateReleased: "2026-01-12T00:00:00Z",
+  isFeatured: true,
+  popularityScore: 1000,
+  gamePopularityRank: 42,
+  downloadsCount: 12_840,
+  categories: [
+    { id: 1, name: "Adventure", slug: "adventure", classId: 6 },
+    { id: 2, name: "Story & Lore", slug: "story", classId: 6 },
+  ],
+  status: 4,
+  classId: 6,
+};

@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-pixel: var(--font-pixel-font);
+
+  --color-night-950: #05070f;
+  --color-night-900: #0b1020;
+  --color-night-850: #0d1428;
+  --color-night-800: #101830;
+  --color-night-700: #182240;
+  --color-night-600: #223050;
+  --color-night-500: #31406a;
+
+  --color-pixel-purple: #a78bfa;
+  --color-pixel-blue: #60a5fa;
+  --color-pixel-cyan: #22d3ee;
+  --color-pixel-green: #4ade80;
+  --color-pixel-pink: #f472b6;
+  --color-pixel-amber: #fbbf24;
+}
+
+:root {
+  --background: #05070f;
+  --foreground: #e2e8f0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(124 58 237 / 0.45);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-pixel-cyan);
+  outline-offset: 2px;
+}
+
+@utility font-pixel {
+  font-family: var(--font-pixel), monospace;
+}
+
+@utility text-glow-cyan {
+  text-shadow: 0 0 12px rgb(34 211 238 / 0.65), 0 0 32px rgb(34 211 238 / 0.35);
+}
+
+@utility text-glow-purple {
+  text-shadow: 0 0 12px rgb(167 139 250 / 0.65), 0 0 32px rgb(167 139 250 / 0.35);
+}
+
+@utility text-gradient {
+  background: linear-gradient(100deg, #a78bfa 0%, #60a5fa 35%, #22d3ee 70%, #4ade80 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(rgb(96 165 250 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(96 165 250 / 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@utility bg-grid-dense {
+  background-image:
+    linear-gradient(rgb(34 211 238 / 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(34 211 238 / 0.08) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@utility pixel-panel {
+  background: linear-gradient(180deg, rgb(16 24 48 / 0.9), rgb(11 16 32 / 0.95));
+  border: 1px solid rgb(49 64 106 / 0.6);
+  box-shadow:
+    0 0 0 1px rgb(5 7 15 / 0.8),
+    0 12px 40px -12px rgb(0 0 0 / 0.7),
+    inset 0 1px 0 0 rgb(167 139 250 / 0.08);
+}
+
+@utility pixel-border {
+  border: 1px solid rgb(49 64 106 / 0.7);
+  box-shadow:
+    0 3px 0 0 rgb(5 7 15 / 0.9),
+    inset 0 0 0 1px rgb(5 7 15 / 0.35);
+}
+
+@utility scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgb(0 0 0 / 0.22) 0px,
+    rgb(0 0 0 / 0.22) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+@utility animate-float {
+  animation: nb-float 7s ease-in-out infinite;
+}
+
+@utility animate-shoot {
+  animation: nb-shoot 5s linear infinite;
+}
+
+@keyframes nb-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes nb-shoot {
+  0% {
+    transform: translate(0, 0) rotate(-35deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-55vw, 45vh) rotate(-35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes nb-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-glow {
+  animation: nb-pulse-glow 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Minimal markdown rendering for docs/changelogs */
+.nb-prose {
+  color: #cbd5e1;
+  line-height: 1.75;
+}
+.nb-prose h1,
+.nb-prose h2,
+.nb-prose h3 {
+  color: #f1f5f9;
+  margin: 1.5rem 0 0.75rem;
+  font-weight: 700;
+}
+.nb-prose h1 {
+  font-size: 1.5rem;
+}
+.nb-prose h2 {
+  font-size: 1.25rem;
+}
+.nb-prose h3 {
+  font-size: 1.05rem;
+}
+.nb-prose p {
+  margin: 0.75rem 0;
+}
+.nb-prose ul,
+.nb-prose ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+.nb-prose ul {
+  list-style: disc;
+}
+.nb-prose ol {
+  list-style: decimal;
+}
+.nb-prose li {
+  margin: 0.35rem 0;
+}
+.nb-prose code {
+  background: rgb(49 64 106 / 0.4);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.9em;
+}
+.nb-prose blockquote {
+  border-left: 3px solid var(--color-pixel-purple);
+  padding-left: 1rem;
+  color: #94a3b8;
+  margin: 1rem 0;
+}

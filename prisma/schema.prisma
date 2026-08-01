@@ -1,0 +1,548 @@
+// NightBeam Studio Website — data model
+// PostgreSQL via Prisma ORM 6. Auth.js v5 models: User, Account, Session,
+// VerificationToken (field names must match the Auth.js Prisma adapter).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  CONTENT_MANAGER
+  SUPPORT_AGENT
+  USER
+}
+
+enum ProjectType {
+  MOD
+  MODPACK
+  PLUGIN
+  DATAPACK
+  RESOURCEPACK
+  SHADER
+  TOOL
+}
+
+enum Loader {
+  NEOFORGE
+  FABRIC
+  FORGE
+  QUILT
+  SPIGOT
+  PAPER
+  VELOCITY
+  VANILLA
+}
+
+enum Platform {
+  CURSEFORGE
+  MODRINTH
+  GITHUB
+}
+
+enum FileType {
+  RELEASE
+  BETA
+  ALPHA
+}
+
+enum NotificationType {
+  SYSTEM
+  PROJECT
+  FOLLOW
+  COMMENT
+  DOWNLOAD
+  DIGEST
+}
+
+enum EventType {
+  VIEW
+  DOWNLOAD
+  REDIRECT
+  SEARCH
+  FAVORITE
+  FOLLOW
+  SIGNUP
+  LOGIN
+}
+
+enum SocialPlatform {
+  DISCORD
+  YOUTUBE
+  GITHUB
+  TWITCH
+  X
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          Role      @default(USER)
+  isBanned      Boolean   @default(false)
+  authVersion   Int       @default(1)
+  displayName   String?
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts               Account[]
+  sessions               Session[]
+  profile                Profile?
+  favorites              Favorite[]
+  follows                Follow[]
+  recentlyViewed         RecentlyViewed[]
+  downloads              UserDownload[]
+  loginHistory           LoginHistory[]
+  notificationPrefs      NotificationPreference?
+  notifications          Notification[]
+  analytics              AnalyticsEvent[]
+  auditLogs              AuditLog[]
+  comments               ProjectComment[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Profile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  displayName       String?
+  avatar            String?
+  bio               String?
+  website           String?
+  preferredVersions String[]
+  preferredLoaders  String[]
+  emailPrefs        Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id            String      @id
+  slug          String      @unique
+  name          String
+  summary       String      @db.Text
+  description   String      @db.Text
+  type          ProjectType @default(MOD)
+  authorName    String
+  studioName    String      @default("NightBeam Studio")
+  curseforgeId  Int?        @unique
+  modrinthId    String?     @unique
+  githubUrl     String?
+  curseforgeUrl String?
+  iconUrl       String?
+  bannerUrl     String?
+  featured      Boolean     @default(false)
+  status        String      @default("ACTIVE")
+  downloads     Int         @default(0)
+  followers     Int         @default(0)
+  views         Int         @default(0)
+  rating        Float       @default(0)
+  lastSyncedAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  custom         CustomProject?
+  versions       ProjectVersion[]
+  screenshots    Screenshot[]
+  changelogs     ChangelogEntry[]
+  docs           DocumentationPage[]
+  dependencies   ProjectDependency[]
+  comments       ProjectComment[]
+  categories     ProjectCategory[]
+  tags           ProjectTag[]
+  favorites      Favorite[]
+  follows        Follow[]
+  recentViews    RecentlyViewed[]
+  userDownloads  UserDownload[]
+  notifications  Notification[]
+  analytics      AnalyticsEvent[]
+}
+
+model CustomProject {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  name        String?
+  summary     String?
+  description String?
+  iconUrl     String?
+  bannerUrl   String?
+  featured    Boolean?
+  status      String?
+  downloads   Int?
+  followers   Int?
+  views       Int?
+  rating      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectVersion {
+  id               String   @id @default(cuid())
+  projectId        String
+  version          String
+  minecraftVersions String[]
+  loaders          String[]
+  changelog        String?  @db.Text
+  releaseDate      DateTime
+  releaseType      FileType @default(RELEASE)
+  isLatest         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  files   ProjectFile[]
+
+  @@index([projectId])
+}
+
+model ProjectFile {
+  id           String   @id @default(cuid())
+  versionId    String
+  fileName     String
+  fileSize     Int
+  downloads    Int      @default(0)
+  downloadUrl  String?
+  sha1         String?
+  kind         String   @default("primary")
+  createdAt    DateTime @default(now())
+
+  version ProjectVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([versionId])
+}
+
+model Screenshot {
+  id        String @id @default(cuid())
+  projectId String
+  url       String
+  title     String?
+  alt       String?
+  sortOrder Int    @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ChangelogEntry {
+  id          String   @id @default(cuid())
+  projectId   String
+  version     String
+  title       String
+  content     String   @db.Text
+  publishedAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model DocumentationPage {
+  id        String @id @default(cuid())
+  projectId String
+  slug      String
+  title     String
+  content   String @db.Text
+  sortOrder Int    @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, slug])
+}
+
+model ProjectDependency {
+  id          String  @id @default(cuid())
+  projectId   String
+  name        String
+  slug        String?
+  curseforgeId Int?
+  required    Boolean @default(true)
+  kind        String  @default("mod")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectComment {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  parentId  String?
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+}
+
+model Category {
+  id       String      @id @default(cuid())
+  slug     String      @unique
+  name     String
+  type     ProjectType?
+  projects ProjectCategory[]
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  name     String
+  projects ProjectTag[]
+}
+
+model ProjectCategory {
+  projectId  String
+  categoryId String
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, categoryId])
+}
+
+model ProjectTag {
+  projectId String
+  tagId     String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+model RecentlyViewed {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  viewedAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+}
+
+model UserDownload {
+  id         String   @id @default(cuid())
+  userId     String
+  projectId  String
+  fileId     String?
+  downloadedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId, downloadedAt])
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  provider  String
+  ip        String?
+  userAgent String?
+  success   Boolean  @default(true)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType @default(SYSTEM)
+  title     String
+  body      String?
+  link      String?
+  projectId String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt])
+}
+
+model NotificationPreference {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  emailEnabled        Boolean @default(true)
+  digestEnabled       Boolean @default(true)
+  digestFrequency     String  @default("WEEKLY")
+  projectNotifications Boolean @default(true)
+  follows             Boolean @default(true)
+  comments            Boolean @default(true)
+  announcements       Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnalyticsEvent {
+  id        String    @id @default(cuid())
+  type      EventType
+  userId    String?
+  projectId String?
+  sessionId String?
+  path      String?
+  referrer  String?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([type, createdAt])
+  @@index([projectId, createdAt])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  body        String    @db.Text
+  active      Boolean   @default(true)
+  dismissible Boolean   @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SyncState {
+  key           String    @id
+  status        String    @default("IDLE")
+  message       String?
+  projectsSynced Int      @default(0)
+  durationMs    Int       @default(0)
+  lastRunAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+model ApiErrorLog {
+  id        String   @id @default(cuid())
+  route     String
+  method    String
+  status    Int
+  message   String?
+  stack     String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model HomeSection {
+  id        String  @id @default(cuid())
+  key       String  @unique
+  title     String
+  subtitle  String?
+  enabled   Boolean @default(true)
+  sortOrder Int     @default(0)
+  content   Json?
+  updatedAt DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  platform  SocialPlatform
+  label     String?
+  url       String
+  sortOrder Int            @default(0)
+  updatedAt DateTime       @updatedAt
+}

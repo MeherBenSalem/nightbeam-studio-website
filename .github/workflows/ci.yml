@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Typecheck · lint · tests · build · compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Validate dev compose
+        run: docker compose -f docker-compose.yml config
+      - name: Validate prod compose
+        run: docker compose -f docker-compose.prod.yml config
+
+  integration:
+    name: Prisma integration tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: nightbeam
+          POSTGRES_PASSWORD: nightbeam
+          POSTGRES_DB: nightbeam
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nightbeam -d nightbeam"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nightbeam:nightbeam@localhost:5432/nightbeam?schema=public
+      TEST_DATABASE_URL: postgresql://nightbeam:nightbeam@localhost:5432/nightbeam?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: npm run db:seed
+      - run: npx vitest run tests/integration
+
+  e2e:
+    name: Playwright smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          DATA_BACKEND: memory
+          AUTH_SECRET: ci-test-secret
+          AUTH_ADMIN_EMAIL: admin@nightbeam.studio
+          AUTH_ADMIN_PASSWORD: NightBeamAdmin123!
+          DEV_AUTO_VERIFY: "true"
+          ANALYTICS_ENABLED: "false"

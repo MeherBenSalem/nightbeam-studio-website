@@ -71,8 +71,9 @@ function loadersFromFile(file: CfFile): Loader[] {
 
 function deriveVersion(file: CfFile): string {
   for (const candidate of [file.displayName, file.fileName]) {
-    const match = candidate?.match(/(0\.\d+(?:\.\d+)?(?:[-+][a-zA-Z0-9.-]+)?)/);
-    if (match) return match[1];
+    const matches = [...(candidate ?? "").matchAll(/(\d+\.\d+(?:\.\d+)?(?:[-+][a-zA-Z0-9.-]+)?)/g)];
+    const last = matches.at(-1)?.[1];
+    if (last) return last.replace(/\.jar$/i, "").replace(/-jar$/i, "");
   }
   return file.displayName ?? file.fileName;
 }

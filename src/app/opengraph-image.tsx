@@ -1,0 +1,61 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { ImageResponse } from "next/og";
+
+export const alt = "NightBeam Studio — The Birth of Steve";
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+
+export default async function OgImage() {
+  const fontData = await readFile(join(process.cwd(), "src/assets/fonts/PressStart2P-Regular.ttf"));
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: 72,
+          background: "linear-gradient(135deg, #05070f 0%, #0b1020 45%, #101830 70%, #05070f 100%)",
+          color: "#e2e8f0",
+          fontFamily: "PressStart2P",
+          position: "relative",
+        }}
+      >
+        <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 48 }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 12,
+              background: "linear-gradient(135deg, #7c3aed, #06b6d4)",
+              fontSize: 28,
+              color: "#ffffff",
+            }}
+          >
+            NB
+          </div>
+          <div style={{ fontSize: 28, letterSpacing: 4, color: "#22d3ee" }}>NIGHTBEAM STUDIO</div>
+        </div>
+        <div style={{ fontSize: 58, lineHeight: 1.3, color: "#ffffff", display: "flex", flexDirection: "column" }}>
+          <span>THE BIRTH OF</span>
+          <span style={{ background: "linear-gradient(90deg, #a78bfa, #60a5fa, #22d3ee)", backgroundClip: "text", color: "transparent" }}>
+            STEVE
+          </span>
+        </div>
+        <div style={{ marginTop: 40, fontSize: 20, color: "#94a3b8", lineHeight: 1.6 }}>
+          A story-driven Minecraft mod by Mahou · v0.4.0 · NeoForge + Fabric · MC 26.1.2 / 26.2
+        </div>
+      </div>
+    ),
+    {
+      ...size,
+      fonts: [{ name: "PressStart2P", data: fontData, weight: 400 }],
+    },
+  );
+}

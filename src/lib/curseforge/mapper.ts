@@ -33,11 +33,11 @@ export function mapCfLoader(value: string | undefined): Loader | undefined {
 }
 
 function mapVersion(file: CfFile): ProjectVersionDto {
-  const loaders = file.sortableGameVersion
+  const loaders = (file.sortableGameVersion ?? [])
     .map((v) => v.gameVersionType)
     .map((t) => mapCfLoader(t))
     .filter((l): l is Loader => Boolean(l));
-  const minecraftVersions = file.gameVersions
+  const minecraftVersions = (file.gameVersions ?? [])
     .filter((v) => /^\d/.test(v) && !loaders.includes(v as Loader))
     .slice(0, 8);
   return {
@@ -56,7 +56,7 @@ function mapVersion(file: CfFile): ProjectVersionDto {
         fileSize: file.fileLength,
         downloads: file.downloadCount,
         downloadUrl: file.downloadUrl,
-        sha1: file.hashes.find((h) => h.algo === 1)?.value ?? null,
+        sha1: (file.hashes ?? []).find((h) => h.algo === 1)?.value ?? null,
         kind: "primary",
       },
     ],
@@ -64,12 +64,12 @@ function mapVersion(file: CfFile): ProjectVersionDto {
 }
 
 export function mapCfModToSummary(mod: CfMod): ProjectSummary {
-  const latestFile = mod.latestFiles[0];
+  const latestFile = (mod.latestFiles ?? [])[0];
   const minecraftVersions = latestFile
-    ? latestFile.gameVersions.filter((v) => /^\d/.test(v)).slice(0, 8)
+    ? (latestFile.gameVersions ?? []).filter((v) => /^\d/.test(v)).slice(0, 8)
     : [];
-  const loaders = mod.latestFiles.flatMap((f) =>
-    f.sortableGameVersion.map((v) => v.gameVersionType).map((t) => mapCfLoader(t)),
+  const loaders = (mod.latestFiles ?? []).flatMap((f) =>
+    (f.sortableGameVersion ?? []).map((v) => v.gameVersionType).map((t) => mapCfLoader(t)),
   );
   return {
     id: `cf-${mod.id}`,
@@ -78,10 +78,10 @@ export function mapCfModToSummary(mod: CfMod): ProjectSummary {
     summary: mod.summary,
     type: "MOD",
     curseforgeId: mod.id,
-    authorName: mod.authors[0]?.name ?? "NightBeam Studio",
+    authorName: (mod.authors ?? [])[0]?.name ?? "NightBeam Studio",
     studioName: "NightBeam Studio",
     iconUrl: mod.logo?.url ?? null,
-    bannerUrl: mod.screenshots[0]?.url ?? null,
+    bannerUrl: (mod.screenshots ?? [])[0]?.url ?? null,
     featured: mod.isFeatured,
     status: mod.status === 4 ? "ACTIVE" : mod.status === 5 ? "ARCHIVED" : "ACTIVE",
     downloads: mod.downloadCount,
@@ -91,8 +91,8 @@ export function mapCfModToSummary(mod: CfMod): ProjectSummary {
     lastSyncedAt: new Date(),
     minecraftVersions,
     loaders: [...new Set(loaders.filter((l): l is Loader => Boolean(l)))],
-    categories: mod.categories.map((c) => ({ slug: c.slug, name: c.name })),
-    tags: mod.categories.map((c) => ({ slug: c.slug, name: c.name.toLowerCase() })),
+    categories: (mod.categories ?? []).map((c) => ({ slug: c.slug, name: c.name })),
+    tags: (mod.categories ?? []).map((c) => ({ slug: c.slug, name: c.name.toLowerCase() })),
     latestVersion: latestFile?.displayName ?? null,
     updatedAt: new Date(mod.dateModified),
   };
@@ -100,7 +100,7 @@ export function mapCfModToSummary(mod: CfMod): ProjectSummary {
 
 export function mapCfModToDetail(mod: CfMod, files: CfFile[]): ProjectDetail {
   const summary = mapCfModToSummary(mod);
-  const versions = (files.length > 0 ? files : mod.latestFiles)
+  const versions = (files.length > 0 ? files : (mod.latestFiles ?? []))
     .filter((f) => f.isAvailable)
     .sort((a, b) => b.fileDate.localeCompare(a.fileDate))
     .map(mapVersion);
@@ -109,10 +109,10 @@ export function mapCfModToDetail(mod: CfMod, files: CfFile[]): ProjectDetail {
   return {
     ...summary,
     description: mod.description,
-    curseforgeUrl: mod.links.websiteUrl ?? `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`,
-    githubUrl: mod.links.sourceUrl ?? null,
+    curseforgeUrl: mod.links?.websiteUrl ?? `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`,
+    githubUrl: mod.links?.sourceUrl ?? null,
     versions,
-    screenshots: mod.screenshots.map((s, index) => ({
+    screenshots: (mod.screenshots ?? []).map((s, index) => ({
       id: `cf-shot-${s.id}`,
       url: s.url,
       title: s.title || null,

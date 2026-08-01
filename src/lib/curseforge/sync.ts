@@ -1,6 +1,6 @@
 import "server-only";
 import { getServerEnv } from "@/lib/config/env";
-import { getAuthorMods, getModFiles, searchMods } from "@/lib/curseforge/client";
+import { getAuthorMods, getModDetails, getModFiles, searchMods } from "@/lib/curseforge/client";
 import { isCurseForgeConfigured } from "@/lib/curseforge/client";
 import { mapCfModToDetail } from "@/lib/curseforge/mapper";
 import { getRepo } from "@/lib/db/repo";
@@ -27,14 +27,17 @@ export async function runCurseForgeSync(): Promise<SyncStateDto> {
 
   try {
     const authorId = env.CURSEFORGE_AUTHOR_ID ? Number(env.CURSEFORGE_AUTHOR_ID) : null;
-    const mods = authorId && Number.isFinite(authorId)
-      ? await getAuthorMods(authorId)
-      : await searchMods(env.CURSEFORGE_SEARCH_TERM ?? "the birth of steve");
+    const mods = env.CURSEFORGE_SEARCH_TERM
+      ? await searchMods(env.CURSEFORGE_SEARCH_TERM)
+      : authorId && Number.isFinite(authorId)
+        ? await getAuthorMods(authorId)
+        : [];
     let synced = 0;
     for (const mod of mods) {
+      const detail = await getModDetails(mod.id);
       const files = await getModFiles(mod.id);
-      const detail = mapCfModToDetail(mod, files);
-      await repo.upsertCurseForgeProject(detail);
+      const mapped = mapCfModToDetail(detail, files);
+      await repo.upsertCurseForgeProject(mapped);
       synced += 1;
     }
     await repo.setSyncState("curseforge", {

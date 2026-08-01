@@ -108,7 +108,7 @@ export function mapCfModToDetail(mod: CfMod, files: CfFile[]): ProjectDetail {
 
   return {
     ...summary,
-    description: mod.description,
+    description: mod.description ?? mod.summary ?? "",
     curseforgeUrl: mod.links?.websiteUrl ?? `https://www.curseforge.com/minecraft/mc-mods/${mod.slug}`,
     githubUrl: mod.links?.sourceUrl ?? null,
     versions,

@@ -777,6 +777,10 @@ export class MemoryDataStore {
   }
 
   upsertCurseForgeProject(detail: ProjectDetail): void {
+    const existingId = this.slugIndex.get(detail.slug);
+    if (existingId && existingId !== detail.id) {
+      this.projects.delete(existingId);
+    }
     this.projects.set(detail.id, detail);
     this.slugIndex.set(detail.slug, detail.id);
     for (const category of detail.categories) {

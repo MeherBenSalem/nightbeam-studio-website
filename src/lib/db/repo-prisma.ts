@@ -174,7 +174,7 @@ export const prismaRepo: DataRepo = {
     };
     await prisma.$transaction(async (tx) => {
       await tx.project.upsert({
-        where: { id: projectId },
+        where: { slug: detail.slug },
         create: { id: projectId, ...baseData },
         update: baseData,
       });

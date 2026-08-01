@@ -448,9 +448,9 @@ export class MemoryDataStore {
   }
 
   getFeaturedSummaries(limit = 6): ProjectSummary[] {
-    return this.listProjectSummaries({ sort: "downloads", perPage: 100 })
-      .items.filter((p) => p.featured)
-      .slice(0, limit);
+    const all = this.listProjectSummaries({ sort: "downloads", perPage: 100 }).items;
+    const featured = all.filter((p) => p.featured);
+    return (featured.length > 0 ? featured : all).slice(0, limit);
   }
 
   getSiteStats() {

@@ -251,12 +251,19 @@ export const prismaRepo: DataRepo = {
 
   async getFeaturedProjects(limit = 6): Promise<ProjectSummary[]> {
     const prisma = requireDb();
-    const rows = await prisma.project.findMany({
+    let rows = await prisma.project.findMany({
       where: { featured: true },
       include: summaryInclude,
       orderBy: { downloads: "desc" },
       take: limit,
     });
+    if (rows.length === 0) {
+      rows = await prisma.project.findMany({
+        include: summaryInclude,
+        orderBy: { downloads: "desc" },
+        take: limit,
+      });
+    }
     return rows.map(mapSummary);
   },
 

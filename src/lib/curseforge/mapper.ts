@@ -33,16 +33,13 @@ export function mapCfLoader(value: string | undefined): Loader | undefined {
 }
 
 function mapVersion(file: CfFile): ProjectVersionDto {
-  const loaders = (file.sortableGameVersion ?? [])
-    .map((v) => v.gameVersionType)
-    .map((t) => mapCfLoader(t))
-    .filter((l): l is Loader => Boolean(l));
+  const loaders = loadersFromFile(file);
   const minecraftVersions = (file.gameVersions ?? [])
     .filter((v) => /^\d/.test(v) && !loaders.includes(v as Loader))
     .slice(0, 8);
   return {
     id: `cf-file-${file.id}`,
-    version: file.displayName,
+    version: deriveVersion(file),
     minecraftVersions,
     loaders: [...new Set(loaders)],
     changelog: null,
@@ -63,14 +60,29 @@ function mapVersion(file: CfFile): ProjectVersionDto {
   };
 }
 
+function loadersFromFile(file: CfFile): Loader[] {
+  const raw = [
+    ...(file.sortableGameVersion ?? []).map((v) => v.gameVersionType),
+    ...(file.gameVersions ?? []),
+  ];
+  const mapped = raw.map((value) => mapCfLoader(value)).filter((l): l is Loader => Boolean(l));
+  return [...new Set(mapped)];
+}
+
+function deriveVersion(file: CfFile): string {
+  for (const candidate of [file.displayName, file.fileName]) {
+    const match = candidate?.match(/(\d+\.\d+(?:\.\d+)?(?:[-+][a-zA-Z0-9.-]+)?)/);
+    if (match) return match[1];
+  }
+  return file.displayName ?? file.fileName;
+}
+
 export function mapCfModToSummary(mod: CfMod): ProjectSummary {
   const latestFile = (mod.latestFiles ?? [])[0];
   const minecraftVersions = latestFile
     ? (latestFile.gameVersions ?? []).filter((v) => /^\d/.test(v)).slice(0, 8)
     : [];
-  const loaders = (mod.latestFiles ?? []).flatMap((f) =>
-    (f.sortableGameVersion ?? []).map((v) => v.gameVersionType).map((t) => mapCfLoader(t)),
-  );
+  const loaders = (mod.latestFiles ?? []).flatMap((f) => loadersFromFile(f));
   return {
     id: `cf-${mod.id}`,
     slug: mod.slug,
@@ -93,7 +105,7 @@ export function mapCfModToSummary(mod: CfMod): ProjectSummary {
     loaders: [...new Set(loaders.filter((l): l is Loader => Boolean(l)))],
     categories: (mod.categories ?? []).map((c) => ({ slug: c.slug, name: c.name })),
     tags: (mod.categories ?? []).map((c) => ({ slug: c.slug, name: c.name.toLowerCase() })),
-    latestVersion: latestFile?.displayName ?? null,
+    latestVersion: latestFile ? deriveVersion(latestFile) : null,
     updatedAt: new Date(mod.dateModified),
   };
 }

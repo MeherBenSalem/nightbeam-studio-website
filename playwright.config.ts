@@ -22,6 +22,8 @@ export default defineConfig({
     env: {
       DATA_BACKEND: "memory",
       AUTH_SECRET: "playwright-test-secret",
+      AUTH_URL: `http://localhost:${PORT}`,
+      APP_URL: `http://localhost:${PORT}`,
       AUTH_ADMIN_EMAIL: "admin@nightbeam.studio",
       AUTH_ADMIN_PASSWORD: "NightBeamAdmin123!",
       DEV_AUTO_VERIFY: "true",

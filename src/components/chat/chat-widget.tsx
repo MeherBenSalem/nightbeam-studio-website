@@ -47,6 +47,13 @@ export function ChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
+  // Open when the navbar Chat tab is clicked.
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("nightbeam:open-chat", handler);
+    return () => window.removeEventListener("nightbeam:open-chat", handler);
+  }, []);
+
   async function send() {
     if (busyRef.current) return;
     const message = input.trim();

@@ -94,7 +94,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           Skip to content
         </a>
         <Providers session={user}>
-          <Navbar user={user} />
+          <Navbar user={user} chatbotEnabled={isChatbotEnabled()} />
           <main id="main-content" tabIndex={-1}>{children}</main>
           <Footer />
           <CookieConsent />

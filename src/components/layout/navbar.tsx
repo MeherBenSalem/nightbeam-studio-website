@@ -23,7 +23,11 @@ const LINKS = [
   { href: "/community", label: "Membership" },
 ];
 
-export function Navbar({ user }: { user: NavUser | null }) {
+function openChatWidget() {
+  window.dispatchEvent(new CustomEvent("nightbeam:open-chat"));
+}
+
+export function Navbar({ user, chatbotEnabled }: { user: NavUser | null; chatbotEnabled?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -47,6 +51,18 @@ export function Navbar({ user }: { user: NavUser | null }) {
               {link.label}
             </Link>
           ))}
+          {chatbotEnabled ? (
+            <button
+              type="button"
+              onClick={openChatWidget}
+              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-night-800 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
+                <path d="M12 3c-4.5 0-8 2.9-8 6.5 0 1.9 1 3.6 2.6 4.8L6 19l3.4-2c.8.2 1.7.3 2.6.3 4.5 0 8-2.9 8-6.5S16.5 3 12 3Z" />
+              </svg>
+              Chat
+            </button>
+          ) : null}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -114,6 +130,21 @@ export function Navbar({ user }: { user: NavUser | null }) {
               {link.label}
             </Link>
           ))}
+          {chatbotEnabled ? (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                openChatWidget();
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-slate-300 hover:bg-night-800 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
+                <path d="M12 3c-4.5 0-8 2.9-8 6.5 0 1.9 1 3.6 2.6 4.8L6 19l3.4-2c.8.2 1.7.3 2.6.3 4.5 0 8-2.9 8-6.5S16.5 3 12 3Z" />
+              </svg>
+              Chat
+            </button>
+          ) : null}
           {!user ? (
             <div className="flex gap-2 pt-2">
               <Link href="/auth/login" className="flex-1 rounded-md border border-night-500/60 bg-night-900 px-3 py-2 text-center text-sm text-slate-200">

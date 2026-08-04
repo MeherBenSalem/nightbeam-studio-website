@@ -17,6 +17,13 @@ test("chat widget opens and greets the visitor", async ({ page }) => {
   await expect(page.getByText(/Powered by DeepSeek/)).toBeVisible();
 });
 
+test("navbar Chat tab opens the widget", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Chat", exact: true }).click();
+  await expect(page.getByText("NIGHTBEAM ASSISTANT", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Ask me anything about our mods/)).toBeVisible();
+});
+
 test("off-topic questions get the refusal message", async ({ page }) => {
   await openChat(page);
   await ask(page, "what is the capital of france?");

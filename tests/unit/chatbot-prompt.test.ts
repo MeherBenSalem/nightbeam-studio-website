@@ -44,6 +44,11 @@ describe("chatbot prompt — system prompt hardening", () => {
     expect(prompt).toContain("no, for the configs");
   });
 
+  it("keeps compatibility and integration questions in scope", () => {
+    expect(prompt).toContain("Compatibility and integration questions ARE in scope");
+    expect(prompt).toContain("even when the answer is that no integration exists");
+  });
+
   it("does not leak the refusal as an instruction for on-topic answers", () => {
     // The refusal must be clearly scoped to out-of-scope questions.
     const scopeLine = prompt.split("\n").find((line) => line.includes("REFUSAL MESSAGE")) ?? "";

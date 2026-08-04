@@ -204,6 +204,17 @@ test("admin can toggle Pro on a user", async ({ page }) => {
 
   await page.goto("/admin/users");
   const row = page.locator("tr", { hasText: email });
+
+  // Destructive/important actions need an explicit confirmation.
   await row.getByRole("button", { name: "Pro", exact: true }).click();
+  await expect(row.getByText("Grant Pro status?")).toBeVisible();
+  await row.getByTestId("confirm-action").click();
   await expect(row.getByRole("button", { name: "Pro ✓" })).toBeVisible({ timeout: 10_000 });
+
+  // Ban can be cancelled without effect.
+  await row.getByRole("button", { name: "Ban", exact: true }).click();
+  await expect(row.getByText("Ban this user?")).toBeVisible();
+  await row.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(row.getByText("Ban this user?")).toHaveCount(0);
+  await expect(row.getByRole("button", { name: "Ban", exact: true })).toBeVisible();
 });

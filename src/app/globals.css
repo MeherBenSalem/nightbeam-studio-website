@@ -104,19 +104,23 @@ body {
 }
 
 @utility pixel-panel {
-  background: linear-gradient(180deg, rgb(20 20 20 / 0.9), rgb(10 10 10 / 0.95));
-  border: 1px solid rgb(74 74 74 / 0.6);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-night-800) 90%, transparent),
+    color-mix(in srgb, var(--color-night-950) 95%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-night-500) 60%, transparent);
   box-shadow:
-    0 0 0 1px rgb(0 0 0 / 0.8),
-    0 12px 40px -12px rgb(0 0 0 / 0.7),
-    inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+    0 0 0 1px color-mix(in srgb, var(--color-night-950) 80%, transparent),
+    0 12px 40px -12px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 0 color-mix(in srgb, var(--color-night-500) 35%, transparent);
 }
 
 @utility pixel-border {
-  border: 1px solid rgb(74 74 74 / 0.7);
+  border: 1px solid color-mix(in srgb, var(--color-night-500) 70%, transparent);
   box-shadow:
-    0 3px 0 0 rgb(0 0 0 / 0.9),
-    inset 0 0 0 1px rgb(0 0 0 / 0.35);
+    0 3px 0 0 color-mix(in srgb, var(--color-night-950) 90%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-night-950) 35%, transparent);
 }
 
 @utility scanlines {
@@ -230,7 +234,7 @@ body {
   margin: 0.35rem 0;
 }
 .nb-prose code {
-  background: rgb(49 64 106 / 0.4);
+  background: color-mix(in srgb, var(--color-night-700) 45%, transparent);
   border-radius: 4px;
   padding: 0.1rem 0.35rem;
   font-size: 0.9em;

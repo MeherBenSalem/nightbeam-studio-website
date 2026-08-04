@@ -1033,15 +1033,37 @@ export const prismaRepo: DataRepo = {
         titleByConv.set(row.conversationId, row.content.replace(/\s+/g, " ").trim().slice(0, 60));
       }
     }
+    const pinnedRows = ids.length
+      ? await prisma.chatMessage.findMany({
+          where: {
+            AND: [
+              { conversationId: { in: ids } },
+              { pinned: true },
+              ...(userId ? [{ userId }] : [{ userId: null }]),
+              ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+            ],
+          },
+          select: { conversationId: true },
+          distinct: ["conversationId"],
+        })
+      : [];
+    const pinnedConvIds = new Set(
+      pinnedRows.map((row) => row.conversationId).filter((id): id is string => Boolean(id)),
+    );
     return grouped
       .filter((row) => row.conversationId !== null)
       .map((row) => ({
         id: row.conversationId as string,
         title: titleByConv.get(row.conversationId as string) ?? "New conversation",
         messageCount: row._count._all,
+        pinned: pinnedConvIds.has(row.conversationId as string),
         createdAt: row._min.createdAt ?? new Date(),
         updatedAt: row._max.createdAt ?? new Date(),
-      }));
+      }))
+      .sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
   },
 
   async listChatMessages({ userId = null, guestId = null, conversationId = null, limit = 50 }) {
@@ -1095,6 +1117,35 @@ export const prismaRepo: DataRepo = {
       where: {
         AND: [
           { id: messageId },
+          ...(userId ? [{ userId }] : [{ userId: null }]),
+          ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+        ],
+      },
+    });
+    return result.count > 0;
+  },
+
+  async updateChatConversationPin({ conversationId, userId = null, guestId = null, pinned }) {
+    const prisma = requireDb();
+    const result = await prisma.chatMessage.updateMany({
+      where: {
+        AND: [
+          { conversationId },
+          ...(userId ? [{ userId }] : [{ userId: null }]),
+          ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+        ],
+      },
+      data: { pinned },
+    });
+    return result.count > 0;
+  },
+
+  async deleteChatConversation({ conversationId, userId = null, guestId = null }) {
+    const prisma = requireDb();
+    const result = await prisma.chatMessage.deleteMany({
+      where: {
+        AND: [
+          { conversationId },
           ...(userId ? [{ userId }] : [{ userId: null }]),
           ...(guestId ? [{ guestId }] : [{ guestId: null }]),
         ],

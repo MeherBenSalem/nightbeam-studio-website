@@ -397,6 +397,16 @@ export const memoryRepo: DataRepo = {
     return memoryStore.deleteChatMessage({ messageId, userId, guestId });
   },
 
+  async updateChatConversationPin({ conversationId, userId = null, guestId = null, pinned }) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.updateChatConversationPin({ conversationId, userId, guestId, pinned });
+  },
+
+  async deleteChatConversation({ conversationId, userId = null, guestId = null }) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.deleteChatConversation({ conversationId, userId, guestId });
+  },
+
   async listChatConversations({ userId = null, guestId = null }) {
     await memoryStore.ensureSeeded();
     return memoryStore.listChatConversations({ userId, guestId });

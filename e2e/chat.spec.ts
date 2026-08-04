@@ -163,29 +163,28 @@ test("long conversations prompt to compact and start a new one", async ({ page }
   await expect(page.getByRole("button", { name: /how many planets are in the solar system\?/ })).toBeVisible();
 });
 
-test("messages can be pinned and deleted", async ({ page }) => {
+test("conversations can be pinned and deleted", async ({ page }) => {
   await openChat(page);
   await ask(page, "what is the capital of france?");
   await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible({ timeout: 15_000 });
 
-  // After the stream the messages are refreshed with persisted ids.
-  const pin = page.getByRole("button", { name: "Pin message" });
+  const pin = page.getByRole("button", { name: "Pin conversation" });
   await expect(pin.first()).toBeVisible({ timeout: 10_000 });
   await pin.first().click();
-  await expect(page.getByRole("button", { name: "Unpin message" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Unpin conversation" })).toBeVisible();
 
   // Reload → the pin is persisted.
   await page.reload();
   await page.getByRole("button", { name: "Open chat assistant" }).click();
-  await expect(page.getByRole("button", { name: "Unpin message" })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("button", { name: "Unpin conversation" })).toBeVisible({ timeout: 10_000 });
 
-  // Delete the assistant refusal → gone after reload too.
-  await page.getByRole("button", { name: "Delete message" }).last().click();
+  // Delete the conversation → gone after reload too.
+  await page.getByRole("button", { name: "Delete conversation" }).first().click();
   await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toHaveCount(0);
   await page.reload();
   await page.getByRole("button", { name: "Open chat assistant" }).click();
   await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toHaveCount(0);
-  await expect(page.getByText("what is the capital of france?", { exact: true })).toBeVisible();
+  await expect(page.getByText("what is the capital of france?", { exact: true })).toHaveCount(0);
 });
 
 test("admin can toggle Pro on a user", async ({ page }) => {

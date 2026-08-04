@@ -295,6 +295,7 @@ export interface ChatConversationSummaryDto {
   id: string;
   title: string;
   messageCount: number;
+  pinned: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

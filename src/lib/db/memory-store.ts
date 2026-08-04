@@ -886,11 +886,15 @@ export class MemoryDataStore {
           id,
           title: firstUser ? firstUser.content.replace(/\s+/g, " ").trim().slice(0, 60) : "New conversation",
           messageCount: messages.length,
+          pinned: messages.some((m) => m.pinned),
           createdAt: messages[0].createdAt,
           updatedAt: messages[messages.length - 1].createdAt,
         };
       })
-      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+      .sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        return b.updatedAt.getTime() - a.updatedAt.getTime();
+      });
   }
 
   addChatMessage(input: {
@@ -949,6 +953,40 @@ export class MemoryDataStore {
     if (index === -1) return false;
     this.chatMessages.splice(index, 1);
     return true;
+  }
+
+  updateChatConversationPin(input: {
+    conversationId: string;
+    userId?: string | null;
+    guestId?: string | null;
+    pinned: boolean;
+  }): boolean {
+    const matches = this.chatMessages.filter(
+      (m) =>
+        m.conversationId === input.conversationId &&
+        (input.userId ? m.userId === input.userId : m.userId === null) &&
+        (input.guestId ? m.guestId === input.guestId : m.guestId === null),
+    );
+    if (matches.length === 0) return false;
+    for (const message of matches) message.pinned = input.pinned;
+    return true;
+  }
+
+  deleteChatConversation(input: {
+    conversationId: string;
+    userId?: string | null;
+    guestId?: string | null;
+  }): boolean {
+    const before = this.chatMessages.length;
+    this.chatMessages = this.chatMessages.filter(
+      (m) =>
+        !(
+          m.conversationId === input.conversationId &&
+          (input.userId ? m.userId === input.userId : m.userId === null) &&
+          (input.guestId ? m.guestId === input.guestId : m.guestId === null)
+        ),
+    );
+    return this.chatMessages.length < before;
   }
 
   listKnowledgeDocs(): ChatbotKnowledgeDocDto[] {

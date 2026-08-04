@@ -158,6 +158,17 @@ export interface DataRepo {
     pinned: boolean;
   }): Promise<boolean>;
   deleteChatMessage(input: { messageId: string; userId?: string | null; guestId?: string | null }): Promise<boolean>;
+  updateChatConversationPin(input: {
+    conversationId: string;
+    userId?: string | null;
+    guestId?: string | null;
+    pinned: boolean;
+  }): Promise<boolean>;
+  deleteChatConversation(input: {
+    conversationId: string;
+    userId?: string | null;
+    guestId?: string | null;
+  }): Promise<boolean>;
   addChatMessage(input: {
     conversationId?: string | null;
     userId?: string | null;

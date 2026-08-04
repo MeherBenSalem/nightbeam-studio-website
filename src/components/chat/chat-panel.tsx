@@ -12,7 +12,6 @@ interface ChatMessage {
   id?: string;
   role: "user" | "assistant";
   content: string;
-  pinned?: boolean;
 }
 
 export interface ChatQuotaStatus {
@@ -26,6 +25,7 @@ export interface ConversationSummary {
   id: string;
   title: string;
   messageCount: number;
+  pinned: boolean;
   updatedAt: string;
 }
 
@@ -153,7 +153,7 @@ export function ChatPanel({
         return;
       }
       const data = (await response.json()) as {
-        messages?: Array<{ id?: string; role: string; content: string; pinned?: boolean }>;
+        messages?: Array<{ id?: string; role: string; content: string }>;
       };
       const history = data.messages ?? [];
       setMessages(
@@ -162,7 +162,6 @@ export function ChatPanel({
               id: m.id,
               role: m.role === "user" ? "user" : "assistant",
               content: m.content,
-              pinned: Boolean(m.pinned),
             }))
           : [WELCOME],
       );
@@ -341,9 +340,8 @@ export function ChatPanel({
       setTurnstileNonce((n) => n + 1);
       // The conversation list may have gained/changed a conversation.
       void refreshConversations();
-      // Re-read the conversation so streamed messages get persisted ids
-      // (needed for pin/delete actions). Only when the exchange actually
-      // persisted — quota-rejected messages must stay visible locally.
+      // Re-read the conversation so streamed messages get persisted ids.
+      // Only when the exchange actually persisted — quota-rejected messages must stay visible locally.
       if (persisted) void refreshMessages();
     }
   }
@@ -363,7 +361,7 @@ export function ChatPanel({
     activeConversationIdRef.current = activeConversationId;
   }, [activeConversationId]);
 
-  // Refresh the visible messages with persisted ids/pins after a stream.
+  // Refresh the visible messages with persisted ids after a stream.
   const refreshMessages = useCallback(async () => {
     if (!activeConversationIdRef.current) return;
     try {
@@ -372,7 +370,7 @@ export function ChatPanel({
         { cache: "no-store" },
       );
       if (!response.ok) return;
-      const data = (await response.json()) as { messages?: Array<{ id?: string; role: string; content: string; pinned?: boolean }> };
+      const data = (await response.json()) as { messages?: Array<{ id?: string; role: string; content: string }> };
       const history = data.messages ?? [];
       if (history.length === 0) return;
       setMessages(
@@ -380,7 +378,6 @@ export function ChatPanel({
           id: m.id,
           role: m.role === "user" ? "user" : "assistant",
           content: m.content,
-          pinned: Boolean(m.pinned),
         })),
       );
     } catch {
@@ -388,31 +385,49 @@ export function ChatPanel({
     }
   }, []);
 
-  async function togglePin(messageId: string, pinned: boolean) {
-    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, pinned } : m)));
+  const activeConversation = useMemo(
+    () => conversations?.find((conversation) => conversation.id === activeConversationId) ?? null,
+    [conversations, activeConversationId],
+  );
+
+  async function togglePinConversation(conversationId: string, pinned: boolean) {
+    setConversations((prev) =>
+      prev?.map((conversation) =>
+        conversation.id === conversationId ? { ...conversation, pinned } : conversation,
+      ) ?? null,
+    );
     try {
-      const response = await fetch(`/api/chat/messages/${encodeURIComponent(messageId)}`, {
+      const response = await fetch(`/api/chat/conversations/${encodeURIComponent(conversationId)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pinned }),
       });
       if (!response.ok) throw new Error("pin failed");
+      await refreshConversations();
     } catch {
-      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, pinned: !pinned } : m)));
-      setError("Could not update the message. Please try again.");
+      setConversations((prev) =>
+        prev?.map((conversation) =>
+          conversation.id === conversationId ? { ...conversation, pinned: !pinned } : conversation,
+        ) ?? null,
+      );
+      setError("Could not update the conversation. Please try again.");
     }
   }
 
-  async function deleteMessage(messageId: string) {
-    const previous = messages;
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  async function deleteConversation(conversationId: string) {
+    const wasActive = activeConversationId === conversationId;
     try {
-      const response = await fetch(`/api/chat/messages/${encodeURIComponent(messageId)}`, { method: "DELETE" });
+      const response = await fetch(`/api/chat/conversations/${encodeURIComponent(conversationId)}`, {
+        method: "DELETE",
+      });
       if (!response.ok) throw new Error("delete failed");
-      void refreshConversations();
+      if (wasActive) {
+        setActiveConversationId(null);
+        setMessages([WELCOME]);
+      }
+      await refreshConversations();
     } catch {
-      setMessages(previous);
-      setError("Could not delete the message. Please try again.");
+      setError("Could not delete the conversation. Please try again.");
     }
   }
 
@@ -463,23 +478,82 @@ export function ChatPanel({
           <p className="px-2 py-1 text-xs text-slate-500">No conversations yet.</p>
         ) : (
           conversations.map((conversation) => (
-            <button
+            <div
               key={conversation.id}
-              type="button"
-              onClick={() => void loadConversation(conversation.id)}
-              disabled={busy}
-              className={`w-full rounded-md px-2 py-2 text-left transition-colors disabled:opacity-50 ${
+              className={`group flex items-center gap-0.5 rounded-md transition-colors ${
                 conversation.id === activeConversationId
                   ? "bg-night-800 text-white"
                   : "text-slate-300 hover:bg-night-800/60"
               }`}
             >
-              <span className="block truncate text-xs font-medium">{conversation.title || "New conversation"}</span>
-              <span className="block text-[10px] text-slate-500">
-                {formatRelativeTime(conversation.updatedAt)}
-                {conversation.messageCount > 0 ? ` · ${conversation.messageCount} messages` : ""}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => void loadConversation(conversation.id)}
+                disabled={busy}
+                className="min-w-0 flex-1 rounded-md px-2 py-2 text-left disabled:opacity-50"
+              >
+                <span className="flex items-center gap-1 truncate text-xs font-medium">
+                  {conversation.pinned ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-3 w-3 shrink-0 text-pixel-cyan"
+                      aria-hidden
+                    >
+                      <path d="M9 4h6l-1 5 3 3H7l3-3-1-5Z" strokeLinejoin="round" />
+                      <path d="M12 12v8" strokeLinecap="round" fill="none" />
+                    </svg>
+                  ) : null}
+                  <span className="truncate">{conversation.title || "New conversation"}</span>
+                </span>
+                <span className="block text-[10px] text-slate-500">
+                  {formatRelativeTime(conversation.updatedAt)}
+                  {conversation.messageCount > 0 ? ` · ${conversation.messageCount} messages` : ""}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void togglePinConversation(conversation.id, !conversation.pinned);
+                }}
+                disabled={busy}
+                aria-label={conversation.pinned ? "Unpin conversation" : "Pin conversation"}
+                title={conversation.pinned ? "Unpin" : "Pin"}
+                className={`shrink-0 rounded p-1 transition-colors disabled:opacity-50 ${
+                  conversation.pinned ? "text-pixel-cyan" : "text-slate-500 opacity-0 group-hover:opacity-100 hover:text-white"
+                }`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill={conversation.pinned ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-3.5 w-3.5"
+                  aria-hidden
+                >
+                  <path d="M9 4h6l-1 5 3 3H7l3-3-1-5Z" strokeLinejoin="round" />
+                  <path d="M12 12v8" strokeLinecap="round" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void deleteConversation(conversation.id);
+                }}
+                disabled={busy}
+                aria-label="Delete conversation"
+                title="Delete"
+                className="shrink-0 rounded p-1 text-slate-500 opacity-0 transition-colors group-hover:opacity-100 hover:text-red-400 disabled:opacity-50"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden>
+                  <path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           ))
         )}
       </div>
@@ -548,6 +622,44 @@ export function ChatPanel({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            {activeConversation ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void togglePinConversation(activeConversation.id, !activeConversation.pinned)}
+                  disabled={busy}
+                  aria-label={activeConversation.pinned ? "Unpin conversation" : "Pin conversation"}
+                  title={activeConversation.pinned ? "Unpin conversation" : "Pin conversation"}
+                  className={`rounded p-1 transition-colors disabled:opacity-50 ${
+                    activeConversation.pinned ? "text-pixel-cyan" : "text-slate-400 hover:bg-night-700 hover:text-white"
+                  }`}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill={activeConversation.pinned ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="h-5 w-5"
+                    aria-hidden
+                  >
+                    <path d="M9 4h6l-1 5 3 3H7l3-3-1-5Z" strokeLinejoin="round" />
+                    <path d="M12 12v8" strokeLinecap="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void deleteConversation(activeConversation.id)}
+                  disabled={busy}
+                  aria-label="Delete conversation"
+                  title="Delete conversation"
+                  className="rounded p-1 text-slate-400 transition-colors hover:bg-night-700 hover:text-red-400 disabled:opacity-50"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden>
+                    <path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </>
+            ) : null}
             {mode === "floating" ? (
               <Link
                 href="/chat"
@@ -590,45 +702,12 @@ export function ChatPanel({
           <div className={mode === "full" ? "mx-auto w-full max-w-3xl space-y-3 px-4 py-4 sm:px-6" : "space-y-3 px-4 py-4"}>
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className="relative max-w-[85%]">
-                  {message.id ? (
-                    <div className="absolute -top-2.5 right-0 flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => void togglePin(message.id as string, !message.pinned)}
-                        aria-label={message.pinned ? "Unpin message" : "Pin message"}
-                        title={message.pinned ? "Unpin" : "Pin"}
-                        className={`rounded p-0.5 transition-colors ${
-                          message.pinned ? "text-pixel-cyan" : "text-slate-500 hover:text-white"
-                        }`}
-                      >
-                        <svg viewBox="0 0 24 24" fill={message.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden>
-                          <path d="M9 4h6l-1 5 3 3H7l3-3-1-5Z" strokeLinejoin="round" />
-                          <path d="M12 12v8" strokeLinecap="round" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void deleteMessage(message.id as string)}
-                        aria-label="Delete message"
-                        title="Delete"
-                        className="rounded p-0.5 text-slate-500 transition-colors hover:text-red-400"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden>
-                          <path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    </div>
-                  ) : null}
+                <div className="max-w-[85%]">
                   <div
                     className={
                       message.role === "user"
-                        ? `whitespace-pre-wrap rounded-lg bg-night-700 px-3 py-2 text-sm text-white ${
-                            message.pinned ? "border border-pixel-cyan/60" : ""
-                          }`
-                        : `rounded-lg border bg-night-850 px-3 py-2 text-sm leading-relaxed text-slate-200 ${
-                            message.pinned ? "border-pixel-cyan/70" : "border-night-600"
-                          }`
+                        ? "whitespace-pre-wrap rounded-lg bg-night-700 px-3 py-2 text-sm text-white"
+                        : "rounded-lg border border-night-600 bg-night-850 px-3 py-2 text-sm leading-relaxed text-slate-200"
                     }
                   >
                     {message.role === "user" ? message.content : <ChatMarkdown content={message.content} />}

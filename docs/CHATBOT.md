@@ -62,10 +62,20 @@ Site project docs (`DocumentationPage`) join the corpus automatically via
 
 - Floating widget (bottom-right) with a **Chat tab in the navbar** (both
   open the panel), an expand button in the header, and a full-page chat at
-  `/chat` (`src/app/chat/page.tsx`) that reuses the same panel.
+  `/chat` (`src/app/chat/page.tsx`) that reuses the same panel and fills the
+  viewport below the navbar (ChatGPT-style layout: centered message column
+  + composer pinned at the bottom).
 - The header shows the **live quota** (anonymous: N free questions left;
   free: N of 10 per 5h; Pro: unlimited), fetched from
   `GET /api/chat/quota` and updated after every exchange.
+- **Chat history is saved** (`ChatMessage` rows) and restored on open via
+  `GET /api/chat/history` for logged-in users and guests (signed cookie) —
+  reopening the chat shows the previous conversation instead of the
+  welcome message.
+- Assistant answers render as **markdown** (bold, lists, inline code,
+  fenced JSON blocks) via `src/components/chat/chat-markdown.tsx` — safe,
+  no raw HTML.
+- The message list scrolls in place — it never scrolls the page.
 - No model/provider branding — the header says "NightBeam Assistant" and
   the model is instructed to never reveal that it is an AI or which model
   it runs on.

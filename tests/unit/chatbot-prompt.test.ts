@@ -49,6 +49,12 @@ describe("chatbot prompt — system prompt hardening", () => {
     expect(prompt).toContain("even when the answer is that no integration exists");
   });
 
+  it("never refuses on unrecognized feature names like mana", () => {
+    expect(prompt).toContain("Never refuse a question just because it mentions a feature you do not recognize");
+    expect(prompt).toContain("mana");
+    expect(prompt).toContain("When in doubt, answer — do not refuse");
+  });
+
   it("does not leak the refusal as an instruction for on-topic answers", () => {
     // The refusal must be clearly scoped to out-of-scope questions.
     const scopeLine = prompt.split("\n").find((line) => line.includes("REFUSAL MESSAGE")) ?? "";

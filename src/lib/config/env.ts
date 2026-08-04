@@ -61,6 +61,24 @@ const serverEnvSchema = z.object({
   COMMUNITY_YOUTUBE_SUBSCRIBERS: z.coerce.number().default(380),
   COMMUNITY_GITHUB_STARS: z.coerce.number().default(0),
   ANALYTICS_ENABLED: bool(true),
+
+  // --- Chatbot (DeepSeek) -------------------------------------------
+  // Chat is disabled until DEEPSEEK_API_KEY is set; everything else is optional.
+  DEEPSEEK_API_KEY: z.string().optional(),
+  CHATBOT_ENABLED: bool(true),
+  CHATBOT_MODEL: z.string().default("deepseek-chat"),
+  CHATBOT_ANON_LIMIT: z.coerce.number().default(2),
+  CHATBOT_FREE_WINDOW_LIMIT: z.coerce.number().default(10),
+  CHATBOT_FREE_WINDOW_MS: z.coerce.number().default(5 * 60 * 60 * 1000),
+  CHATBOT_PRO_ROLES: z.string().default("ADMIN,SUPER_ADMIN,SUPPORT_AGENT"),
+  CHATBOT_MAX_MESSAGE_LENGTH: z.coerce.number().default(2000),
+  CHATBOT_MAX_OUTPUT_TOKENS: z.coerce.number().default(800),
+  CHATBOT_MAX_CONTEXT_TOKENS: z.coerce.number().default(12000),
+  CHATBOT_TEMPERATURE: z.coerce.number().default(0.3),
+  CHATBOT_GUARD_ENABLED: bool(true),
+  // Comma-separated repo roots whose docs/**/*.md feed the knowledge base
+  // (used by `npm run kb:sync` and by the memory-mode fallback loader).
+  CHATBOT_KB_ROOTS: z.string().default(""),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -101,4 +119,13 @@ export function isSmtpConfigured(): boolean {
 export function isTurnstileConfigured(): boolean {
   const env = getServerEnv();
   return Boolean(env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+}
+
+export function isChatbotEnabled(): boolean {
+  const env = getServerEnv();
+  return env.CHATBOT_ENABLED && Boolean(env.DEEPSEEK_API_KEY);
+}
+
+export function getProRoles(): Set<string> {
+  return new Set(getServerEnv().CHATBOT_PRO_ROLES.split(",").map((role) => role.trim()).filter(Boolean));
 }

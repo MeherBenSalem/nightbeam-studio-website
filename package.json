@@ -17,7 +17,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "worker": "tsx src/worker/index.ts",
-    "cf:sync": "tsx scripts/sync.ts"
+    "cf:sync": "tsx scripts/sync.ts",
+    "kb:sync": "tsx scripts/chatbot-kb-sync.ts"
   },
   "engines": {
     "node": ">=20.0.0"

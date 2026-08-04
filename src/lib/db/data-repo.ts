@@ -3,6 +3,7 @@ import type {
   AnnouncementDto,
   ApiErrorDto,
   AuditLogDto,
+  ChatbotKnowledgeDocDto,
   CommunityStatsDto,
   ProjectCommentDto,
   EventType,
@@ -31,6 +32,7 @@ export interface UserPatch {
   passwordHash?: string | null;
   role?: Role;
   isBanned?: boolean;
+  isPro?: boolean;
   authVersion?: number;
   displayName?: string | null;
   avatar?: string | null;
@@ -128,4 +130,27 @@ export interface DataRepo {
   listAllSocials(): Promise<SocialLinkDto[]>;
   upsertSocial(input: SocialLinkDto): Promise<void>;
   deleteSocial(platform: string): Promise<void>;
+
+  countChatMessagesByUser(userId: string, since: Date): Promise<number>;
+  countChatMessagesByGuest(guestId: string): Promise<number>;
+  addChatMessage(input: {
+    userId?: string | null;
+    guestId?: string | null;
+    role: string;
+    content: string;
+    topic?: string | null;
+    model?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+    durationMs?: number;
+  }): Promise<void>;
+  listKnowledgeDocs(): Promise<ChatbotKnowledgeDocDto[]>;
+  upsertKnowledgeDoc(input: {
+    source: string;
+    slug: string;
+    title: string;
+    content: string;
+    projectId?: string | null;
+    filePath?: string | null;
+  }): Promise<void>;
 }

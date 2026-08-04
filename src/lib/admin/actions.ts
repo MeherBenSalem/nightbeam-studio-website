@@ -44,6 +44,20 @@ export async function setUserBannedAction(formData: FormData): Promise<ActionSta
   return { ok: true };
 }
 
+export async function setUserProAction(formData: FormData): Promise<ActionState> {
+  const actor = await requirePermission("users.manage");
+  if (!actor) return { error: "Forbidden" };
+  const userId = String(formData.get("userId") ?? "");
+  const pro = formData.get("pro") === "1";
+  const repo = await getRepo();
+  const target = await repo.getUserById(userId);
+  if (!target) return { error: "User not found" };
+  await repo.updateUser(userId, { isPro: pro });
+  await repo.logAudit({ actorId: actor.id, action: pro ? "user.pro_grant" : "user.pro_revoke", targetType: "user", targetId: userId });
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
+
 export async function deleteUserAction(formData: FormData): Promise<ActionState> {
   const actor = await requirePermission("users.manage");
   if (!actor) return { error: "Forbidden" };

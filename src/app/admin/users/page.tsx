@@ -50,9 +50,16 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                       </td>
                       <td className="px-4 py-3 text-slate-400">{formatDate(item.createdAt)}</td>
                       <td className="px-4 py-3">
-                        <span className={`rounded px-2 py-0.5 text-xs ${item.isBanned ? "bg-red-500/15 text-red-400" : "bg-green-500/15 text-pixel-green"}`}>
-                          {item.isBanned ? "Banned" : "Active"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`rounded px-2 py-0.5 text-xs ${item.isBanned ? "bg-red-500/15 text-red-400" : "bg-green-500/15 text-pixel-green"}`}>
+                            {item.isBanned ? "Banned" : "Active"}
+                          </span>
+                          {item.isPro ? (
+                            <span className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
+                              Pro
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <UserRowActions user={item} canManageRoles={user.role === "SUPER_ADMIN" || user.role === "ADMIN"} />

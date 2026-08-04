@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { CookieConsent } from "@/components/layout/cookie-consent";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth/auth";
-import { getServerEnv } from "@/lib/config/env";
+import { getServerEnv, isChatbotEnabled } from "@/lib/config/env";
 import "./globals.css";
 
 const minecraft = localFont({
@@ -97,6 +98,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <main id="main-content" tabIndex={-1}>{children}</main>
           <Footer />
           <CookieConsent />
+          {isChatbotEnabled() ? <ChatWidget /> : null}
         </Providers>
       </body>
     </html>

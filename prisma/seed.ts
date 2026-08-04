@@ -162,6 +162,7 @@ async function main() {
         passwordHash,
         emailVerified: new Date(),
         role: "SUPER_ADMIN",
+        isPro: true,
       },
     });
     console.log(`Seeded super admin: ${adminEmail}`);

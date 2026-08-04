@@ -12,6 +12,8 @@ import type {
   AnalyticsRow,
   AnnouncementDto,
   AuditLogDto,
+  ChatbotKnowledgeDocDto,
+  ChatMessageDto,
   CommunityStatsDto,
   EventType,
   HomeSectionDto,
@@ -41,6 +43,7 @@ export interface MemoryUserRecord {
   passwordHash: string | null;
   role: Role;
   isBanned: boolean;
+  isPro: boolean;
   authVersion: number;
   displayName: string | null;
   avatar: string | null;
@@ -136,6 +139,8 @@ export class MemoryDataStore {
   sections = new Map<string, HomeSectionDto>();
   socials = new Map<string, SocialLinkDto>();
   overrides = new Map<string, ProjectOverrideDto>();
+  chatMessages: ChatMessageDto[] = [];
+  knowledgeDocs = new Map<string, ChatbotKnowledgeDocDto>();
 
   seeded = false;
   seeding: Promise<void> | null = null;
@@ -196,6 +201,7 @@ export class MemoryDataStore {
       passwordHash: hash,
       role: "SUPER_ADMIN",
       isBanned: false,
+      isPro: true,
       authVersion: 1,
       displayName: "NightBeam Admin",
       avatar: null,
@@ -238,6 +244,7 @@ export class MemoryDataStore {
       passwordHash: input.passwordHash ?? null,
       role: input.role ?? "USER",
       isBanned: false,
+      isPro: false,
       authVersion: 1,
       displayName: input.name ?? null,
       avatar: input.image ?? null,
@@ -251,7 +258,7 @@ export class MemoryDataStore {
     return user;
   }
 
-  updateUser(id: string, patch: Partial<Pick<MemoryUserRecord, "name" | "email" | "emailVerified" | "image" | "passwordHash" | "role" | "isBanned" | "authVersion" | "displayName" | "avatar">>): MemoryUserRecord | null {
+  updateUser(id: string, patch: Partial<Pick<MemoryUserRecord, "name" | "email" | "emailVerified" | "image" | "passwordHash" | "role" | "isBanned" | "isPro" | "authVersion" | "displayName" | "avatar">>): MemoryUserRecord | null {
     const user = this.users.get(id);
     if (!user) return null;
     if (patch.email && patch.email !== user.email) {
@@ -265,6 +272,7 @@ export class MemoryDataStore {
     if (patch.passwordHash !== undefined) user.passwordHash = patch.passwordHash;
     if (patch.role !== undefined) user.role = patch.role;
     if (patch.isBanned !== undefined) user.isBanned = patch.isBanned;
+    if (patch.isPro !== undefined) user.isPro = patch.isPro;
     if (patch.authVersion !== undefined) user.authVersion = patch.authVersion;
     if (patch.displayName !== undefined) user.displayName = patch.displayName;
     if (patch.avatar !== undefined) user.avatar = patch.avatar;
@@ -791,6 +799,68 @@ export class MemoryDataStore {
       if (!this.tags.has(tag.slug)) this.tags.set(tag.slug, tag);
     }
   }
+
+  // --- Chatbot -------------------------------------------------------
+
+  countChatMessagesByUser(userId: string, since: Date): number {
+    return this.chatMessages.filter((m) => m.userId === userId && m.role === "user" && m.createdAt >= since).length;
+  }
+
+  countChatMessagesByGuest(guestId: string): number {
+    return this.chatMessages.filter((m) => m.guestId === guestId && m.role === "user").length;
+  }
+
+  addChatMessage(input: {
+    userId?: string | null;
+    guestId?: string | null;
+    role: string;
+    content: string;
+    topic?: string | null;
+    model?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+    durationMs?: number;
+  }): void {
+    this.chatMessages.push({
+      id: uid(),
+      userId: input.userId ?? null,
+      guestId: input.guestId ?? null,
+      role: input.role,
+      content: input.content,
+      topic: input.topic ?? null,
+      model: input.model ?? "deepseek-chat",
+      promptTokens: input.promptTokens ?? 0,
+      completionTokens: input.completionTokens ?? 0,
+      durationMs: input.durationMs ?? 0,
+      createdAt: new Date(),
+    });
+  }
+
+  listKnowledgeDocs(): ChatbotKnowledgeDocDto[] {
+    return [...this.knowledgeDocs.values()].sort((a, b) => a.slug.localeCompare(b.slug));
+  }
+
+  upsertKnowledgeDoc(input: {
+    source: string;
+    slug: string;
+    title: string;
+    content: string;
+    projectId?: string | null;
+    filePath?: string | null;
+  }): void {
+    const key = `${input.source}:${input.slug}`;
+    const existing = this.knowledgeDocs.get(key);
+    this.knowledgeDocs.set(key, {
+      id: existing?.id ?? uid(),
+      source: input.source,
+      slug: input.slug,
+      title: input.title,
+      content: input.content,
+      projectId: input.projectId ?? null,
+      filePath: input.filePath ?? null,
+      updatedAt: new Date(),
+    });
+  }
 }
 
 function defaultPrefs(): NotificationPreferenceDto {
@@ -814,6 +884,7 @@ function toUserDto(user: MemoryUserRecord): UserDto {
     displayName: user.displayName,
     role: user.role,
     isBanned: user.isBanned,
+    isPro: user.isPro,
     authVersion: user.authVersion,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,

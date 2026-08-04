@@ -89,6 +89,7 @@ model User {
   passwordHash  String?
   role          Role      @default(USER)
   isBanned      Boolean   @default(false)
+  isPro         Boolean   @default(false)
   authVersion   Int       @default(1)
   displayName   String?
   avatar        String?
@@ -108,6 +109,26 @@ model User {
   analytics              AnalyticsEvent[]
   auditLogs              AuditLog[]
   comments               ProjectComment[]
+  chatMessages           ChatMessage[]
+}
+
+model ChatMessage {
+  id               String   @id @default(cuid())
+  userId           String?
+  guestId          String?
+  role             String
+  content          String   @db.Text
+  topic            String?
+  model            String   @default("deepseek-chat")
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  durationMs       Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([guestId, createdAt])
 }
 
 model Account {
@@ -203,6 +224,23 @@ model Project {
   userDownloads  UserDownload[]
   notifications  Notification[]
   analytics      AnalyticsEvent[]
+  chatbotDocs    ChatbotKnowledgeDoc[]
+}
+
+model ChatbotKnowledgeDoc {
+  id        String   @id @default(cuid())
+  source    String
+  projectId String?
+  slug      String
+  title     String
+  content   String   @db.Text
+  filePath  String?
+  updatedAt DateTime @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([source, slug])
+  @@index([source])
 }
 
 model CustomProject {

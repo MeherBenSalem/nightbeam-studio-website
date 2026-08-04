@@ -16,6 +16,7 @@ import type {
   AnnouncementDto,
   ApiErrorDto,
   AuditLogDto,
+  ChatbotKnowledgeDocDto,
   HomeSectionDto,
   LoginHistoryDto,
   NotificationDto,
@@ -62,6 +63,7 @@ function toUserDto(row: {
   displayName: string | null;
   role: Role;
   isBanned: boolean;
+  isPro: boolean;
   authVersion: number;
   emailVerified: Date | null;
   createdAt: Date;
@@ -74,6 +76,7 @@ function toUserDto(row: {
     displayName: row.displayName,
     role: row.role,
     isBanned: row.isBanned,
+    isPro: row.isPro,
     authVersion: row.authVersion,
     emailVerified: row.emailVerified,
     createdAt: row.createdAt,
@@ -456,6 +459,7 @@ export const prismaRepo: DataRepo = {
     if (patch.passwordHash !== undefined) data.passwordHash = patch.passwordHash;
     if (patch.role !== undefined) data.role = patch.role as PrismaRole;
     if (patch.isBanned !== undefined) data.isBanned = patch.isBanned;
+    if (patch.isPro !== undefined) data.isPro = patch.isPro;
     if (patch.authVersion !== undefined) data.authVersion = patch.authVersion;
     if (patch.displayName !== undefined) data.displayName = patch.displayName;
     if (patch.avatar !== undefined) data.avatar = patch.avatar;
@@ -963,5 +967,68 @@ export const prismaRepo: DataRepo = {
   async deleteSocial(platform) {
     const prisma = requireDb();
     await prisma.socialLink.deleteMany({ where: { platform: platform as PrismaSocialPlatform } });
+  },
+
+  async countChatMessagesByUser(userId, since) {
+    const prisma = requireDb();
+    return prisma.chatMessage.count({ where: { userId, role: "user", createdAt: { gte: since } } });
+  },
+
+  async countChatMessagesByGuest(guestId) {
+    const prisma = requireDb();
+    return prisma.chatMessage.count({ where: { guestId, role: "user" } });
+  },
+
+  async addChatMessage(input) {
+    const prisma = requireDb();
+    await prisma.chatMessage.create({
+      data: {
+        userId: input.userId ?? null,
+        guestId: input.guestId ?? null,
+        role: input.role,
+        content: input.content,
+        topic: input.topic ?? null,
+        model: input.model ?? "deepseek-chat",
+        promptTokens: input.promptTokens ?? 0,
+        completionTokens: input.completionTokens ?? 0,
+        durationMs: input.durationMs ?? 0,
+      },
+    });
+  },
+
+  async listKnowledgeDocs(): Promise<ChatbotKnowledgeDocDto[]> {
+    const prisma = requireDb();
+    const rows = await prisma.chatbotKnowledgeDoc.findMany({ orderBy: [{ source: "asc" }, { slug: "asc" }] });
+    return rows.map((row) => ({
+      id: row.id,
+      source: row.source,
+      projectId: row.projectId,
+      slug: row.slug,
+      title: row.title,
+      content: row.content,
+      filePath: row.filePath,
+      updatedAt: row.updatedAt,
+    }));
+  },
+
+  async upsertKnowledgeDoc(input) {
+    const prisma = requireDb();
+    await prisma.chatbotKnowledgeDoc.upsert({
+      where: { source_slug: { source: input.source, slug: input.slug } },
+      create: {
+        source: input.source,
+        slug: input.slug,
+        title: input.title,
+        content: input.content,
+        projectId: input.projectId ?? null,
+        filePath: input.filePath ?? null,
+      },
+      update: {
+        title: input.title,
+        content: input.content,
+        projectId: input.projectId ?? null,
+        filePath: input.filePath ?? null,
+      },
+    });
   },
 };

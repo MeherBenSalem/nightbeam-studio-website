@@ -149,6 +149,7 @@ export interface UserDto {
   displayName: string | null;
   role: Role;
   isBanned: boolean;
+  isPro: boolean;
   authVersion: number;
   emailVerified: Date | null;
   createdAt: Date;
@@ -269,4 +270,29 @@ export interface ApiErrorDto {
   message: string | null;
   stack: string | null;
   createdAt: Date;
+}
+
+export interface ChatMessageDto {
+  id: string;
+  userId: string | null;
+  guestId: string | null;
+  role: string;
+  content: string;
+  topic: string | null;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  durationMs: number;
+  createdAt: Date;
+}
+
+export interface ChatbotKnowledgeDocDto {
+  id: string;
+  source: string;
+  projectId: string | null;
+  slug: string;
+  title: string;
+  content: string;
+  filePath: string | null;
+  updatedAt: Date;
 }

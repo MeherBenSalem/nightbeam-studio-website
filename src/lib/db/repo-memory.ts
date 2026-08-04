@@ -25,6 +25,7 @@ function toUserDto(user: MemoryUserRecord): UserDto {
     displayName: user.displayName,
     role: user.role,
     isBanned: user.isBanned,
+    isPro: user.isPro,
     authVersion: user.authVersion,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,
@@ -360,5 +361,30 @@ export const memoryRepo: DataRepo = {
   async deleteSocial(platform) {
     await memoryStore.ensureSeeded();
     memoryStore.deleteSocial(platform);
+  },
+
+  async countChatMessagesByUser(userId, since) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.countChatMessagesByUser(userId, since);
+  },
+
+  async countChatMessagesByGuest(guestId) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.countChatMessagesByGuest(guestId);
+  },
+
+  async addChatMessage(input) {
+    await memoryStore.ensureSeeded();
+    memoryStore.addChatMessage(input);
+  },
+
+  async listKnowledgeDocs() {
+    await memoryStore.ensureSeeded();
+    return memoryStore.listKnowledgeDocs();
+  },
+
+  async upsertKnowledgeDoc(input) {
+    await memoryStore.ensureSeeded();
+    memoryStore.upsertKnowledgeDoc(input);
   },
 };

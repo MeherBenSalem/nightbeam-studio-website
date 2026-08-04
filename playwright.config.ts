@@ -27,6 +27,8 @@ export default defineConfig({
       DEV_AUTO_VERIFY: "true",
       SIGNUPS_ENABLED: "true",
       ANALYTICS_ENABLED: "false",
+      DEEPSEEK_API_KEY: "e2e-fake-key",
+      CHATBOT_KB_ROOTS: "./tests/fixtures/kb",
     },
   },
 });

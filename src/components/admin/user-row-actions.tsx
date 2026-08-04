@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { deleteUserAction, setUserBannedAction, setUserRoleAction } from "@/lib/admin/actions";
+import { deleteUserAction, setUserBannedAction, setUserProAction, setUserRoleAction } from "@/lib/admin/actions";
 import type { Role, UserDto } from "@/lib/db/types";
 
 const ROLES: Role[] = ["USER", "SUPPORT_AGENT", "CONTENT_MANAGER", "ADMIN", "SUPER_ADMIN"];
@@ -18,6 +18,15 @@ export function UserRowActions({ user, canManageRoles }: { user: UserDto; canMan
     if (user.isBanned) formData.set("banned", "0");
     else formData.set("banned", "1");
     const result = await action(formData);
+    setMessage(result.error ?? (result.ok ? "Saved." : null));
+    if (result.ok) router.refresh();
+  }
+
+  async function togglePro() {
+    const formData = new FormData();
+    formData.set("userId", user.id);
+    formData.set("pro", user.isPro ? "0" : "1");
+    const result = await setUserProAction(formData);
     setMessage(result.error ?? (result.ok ? "Saved." : null));
     if (result.ok) router.refresh();
   }
@@ -38,6 +47,13 @@ export function UserRowActions({ user, canManageRoles }: { user: UserDto; canMan
           ))}
         </select>
       ) : null}
+      <button
+        type="button"
+        onClick={() => void togglePro()}
+        className={`rounded-md border px-2 py-1 text-xs ${user.isPro ? "border-amber-500/40 text-amber-400" : "border-night-500/60 text-slate-400"}`}
+      >
+        {user.isPro ? "Pro ✓" : "Pro"}
+      </button>
       {user.role !== "SUPER_ADMIN" ? (
         <>
           <button

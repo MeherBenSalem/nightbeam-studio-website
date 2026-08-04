@@ -4,6 +4,7 @@ import type {
   ApiErrorDto,
   AuditLogDto,
   ChatbotKnowledgeDocDto,
+  ChatMessageDto,
   CommunityStatsDto,
   ProjectCommentDto,
   EventType,
@@ -133,6 +134,11 @@ export interface DataRepo {
 
   countChatMessagesByUser(userId: string, since: Date): Promise<number>;
   countChatMessagesByGuest(guestId: string): Promise<number>;
+  listChatMessages(input: {
+    userId?: string | null;
+    guestId?: string | null;
+    limit?: number;
+  }): Promise<ChatMessageDto[]>;
   addChatMessage(input: {
     userId?: string | null;
     guestId?: string | null;

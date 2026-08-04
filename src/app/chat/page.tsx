@@ -24,11 +24,10 @@ export default async function ChatPage() {
     ? { id: session.user.id, role: session.user.role ?? "USER" }
     : null;
 
+  // Full-viewport chat (below the 4rem navbar) — ChatGPT-style layout.
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:py-10">
-      <div className="h-[calc(100dvh-11rem)] min-h-[480px] sm:h-[calc(100dvh-13rem)]">
-        <ChatPanel mode="full" user={user} />
-      </div>
+    <div className="h-[calc(100dvh-4rem)] w-full">
+      <ChatPanel mode="full" user={user} />
     </div>
   );
 }

@@ -373,6 +373,11 @@ export const memoryRepo: DataRepo = {
     return memoryStore.countChatMessagesByGuest(guestId);
   },
 
+  async listChatMessages({ userId = null, guestId = null, limit = 50 }) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.listChatMessages({ userId, guestId, limit });
+  },
+
   async addChatMessage(input) {
     await memoryStore.ensureSeeded();
     memoryStore.addChatMessage(input);

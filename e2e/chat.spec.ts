@@ -68,6 +68,37 @@ test("anonymous visitors get 2 free questions, then a login prompt", async ({ pa
   await expect(page.getByTestId("chat-login-cta")).toBeVisible();
 });
 
+test("logged-in users get their saved chat history back", async ({ page }) => {
+  // Register + sign in.
+  const email = `hist-${Date.now()}@nightbeam.studio`;
+  await page.goto("/auth/register");
+  await page.getByLabel("Display name").fill("History Test");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill("PlaywrightPass1");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByText("Account created")).toBeVisible();
+
+  await page.goto("/auth/login");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill("PlaywrightPass1");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 20_000 });
+
+  // Ask an off-topic question (refusal path — no real model needed).
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open chat assistant" }).click();
+  await ask(page, "what is the capital of france?");
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible({ timeout: 15_000 });
+
+  // Reload the page and reopen the chat — the conversation is restored.
+  await page.reload();
+  await page.getByRole("button", { name: "Open chat assistant" }).click();
+  await expect(page.getByText("what is the capital of france?")).toBeVisible();
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible();
+  // The welcome message is not shown again when history exists.
+  await expect(page.getByText(/Ask me anything about our mods/)).toHaveCount(0);
+});
+
 test("admin can toggle Pro on a user", async ({ page }) => {
   // Register a regular user first.
   const email = `pro-${Date.now()}@nightbeam.studio`;

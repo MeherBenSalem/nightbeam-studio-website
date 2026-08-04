@@ -979,6 +979,30 @@ export const prismaRepo: DataRepo = {
     return prisma.chatMessage.count({ where: { guestId, role: "user" } });
   },
 
+  async listChatMessages({ userId = null, guestId = null, limit = 50 }) {
+    const prisma = requireDb();
+    const rows = await prisma.chatMessage.findMany({
+      where: {
+        AND: [{ ...(userId ? { userId } : { userId: null }) }, { ...(guestId ? { guestId } : { guestId: null }) }],
+      },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+    return rows.reverse().map((row) => ({
+      id: row.id,
+      userId: row.userId,
+      guestId: row.guestId,
+      role: row.role,
+      content: row.content,
+      topic: row.topic,
+      model: row.model,
+      promptTokens: row.promptTokens,
+      completionTokens: row.completionTokens,
+      durationMs: row.durationMs,
+      createdAt: row.createdAt,
+    }));
+  },
+
   async addChatMessage(input) {
     const prisma = requireDb();
     await prisma.chatMessage.create({

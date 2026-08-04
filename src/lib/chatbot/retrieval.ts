@@ -23,7 +23,7 @@ const STOP_WORDS = new Set([
  * ("stats" → "stat", "mods" → "mod", "values" → "value").
  */
 export function normalizeToken(token: string): string {
-  let t = token.toLowerCase();
+  const t = token.toLowerCase();
   if (t.length > 4 && t.endsWith("ies")) return `${t.slice(0, -3)}y`;
   if (t.length > 3 && t.endsWith("s") && !/(ss|us|is|as|os)$/.test(t)) return t.slice(0, -1);
   return t;

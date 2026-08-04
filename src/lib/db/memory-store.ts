@@ -810,6 +810,14 @@ export class MemoryDataStore {
     return this.chatMessages.filter((m) => m.guestId === guestId && m.role === "user").length;
   }
 
+  listChatMessages(input: { userId?: string | null; guestId?: string | null; limit?: number }): ChatMessageDto[] {
+    const limit = input.limit ?? 50;
+    return this.chatMessages
+      .filter((m) => (input.userId ? m.userId === input.userId : m.userId === null))
+      .filter((m) => (input.guestId ? m.guestId === input.guestId : m.guestId === null))
+      .slice(-limit);
+  }
+
   addChatMessage(input: {
     userId?: string | null;
     guestId?: string | null;
@@ -932,7 +940,18 @@ export async function getCommunityStats(): Promise<CommunityStatsDto> {
   };
 }
 
-export const memoryStore = new MemoryDataStore();
+// Global singleton: Next.js can bundle server actions and route handlers
+// as separate module graphs, which would otherwise create separate in-memory
+// stores per context. globalThis guarantees a single store per process.
+const GLOBAL_KEY = "__nightbeam_memory_store__";
+
+function getGlobalStore(): MemoryDataStore {
+  const g = globalThis as unknown as Record<string, MemoryDataStore | undefined>;
+  if (!g[GLOBAL_KEY]) g[GLOBAL_KEY] = new MemoryDataStore();
+  return g[GLOBAL_KEY];
+}
+
+export const memoryStore: MemoryDataStore = getGlobalStore();
 
 export function resetMemoryStore(): void {
   memoryStore.users.clear();

@@ -140,7 +140,7 @@ test("full-page chat manages multiple conversations in the sidebar", async ({ pa
 
 test("long conversations prompt to compact and start a new one", async ({ page }) => {
   await page.goto("/chat");
-  // The e2e threshold is tiny (150 estimated tokens) — two exchanges trigger it.
+  // The e2e threshold is tiny (100 estimated tokens) — two exchanges trigger it.
   const questions = [
     "how many planets are in the solar system?",
     "what is the tallest mountain on earth?",
@@ -161,6 +161,31 @@ test("long conversations prompt to compact and start a new one", async ({ page }
   await expect(page.getByText(/fresh conversation/)).toBeVisible({ timeout: 15_000 });
   // Both conversations are in the sidebar.
   await expect(page.getByRole("button", { name: /how many planets are in the solar system\?/ })).toBeVisible();
+});
+
+test("messages can be pinned and deleted", async ({ page }) => {
+  await openChat(page);
+  await ask(page, "what is the capital of france?");
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible({ timeout: 15_000 });
+
+  // After the stream the messages are refreshed with persisted ids.
+  const pin = page.getByRole("button", { name: "Pin message" });
+  await expect(pin.first()).toBeVisible({ timeout: 10_000 });
+  await pin.first().click();
+  await expect(page.getByRole("button", { name: "Unpin message" })).toBeVisible();
+
+  // Reload → the pin is persisted.
+  await page.reload();
+  await page.getByRole("button", { name: "Open chat assistant" }).click();
+  await expect(page.getByRole("button", { name: "Unpin message" })).toBeVisible({ timeout: 10_000 });
+
+  // Delete the assistant refusal → gone after reload too.
+  await page.getByRole("button", { name: "Delete message" }).last().click();
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toHaveCount(0);
+  await page.reload();
+  await page.getByRole("button", { name: "Open chat assistant" }).click();
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toHaveCount(0);
+  await expect(page.getByText("what is the capital of france?", { exact: true })).toBeVisible();
 });
 
 test("admin can toggle Pro on a user", async ({ page }) => {

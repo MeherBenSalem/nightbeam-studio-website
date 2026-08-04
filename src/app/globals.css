@@ -241,3 +241,77 @@ body {
   color: #94a3b8;
   margin: 1rem 0;
 }
+
+/* ------------------------------------------------------------------ */
+/* Light mode: flips the night/pixel palette to light surfaces.        */
+/* Tailwind v4 utilities reference these CSS variables, so one class   */
+/* on <html> re-themes the whole site.                                 */
+/* ------------------------------------------------------------------ */
+html.light {
+  --background: #f7f7f8;
+  --foreground: #1a1a1a;
+
+  --color-night-950: #f7f7f8;
+  --color-night-900: #f0f0f2;
+  --color-night-850: #e9e9ec;
+  --color-night-800: #e0e0e4;
+  --color-night-700: #d2d2d8;
+  --color-night-600: #a6a6ae;
+  --color-night-500: #7c7c86;
+
+  --color-pixel-cyan: #1a1a1a;
+  --color-pixel-purple: #26262b;
+  --color-pixel-blue: #333338;
+  --color-pixel-green: #2b2b30;
+  --color-pixel-pink: #3a3a40;
+  --color-pixel-amber: #4d4d55;
+
+  /* Text scale: darken slate tones so text stays readable on light bg. */
+  --color-slate-100: #0f172a;
+  --color-slate-200: #1e293b;
+  --color-slate-300: #334155;
+  --color-slate-400: #475569;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+
+  /* Accents used for errors / warnings. */
+  --color-red-300: #b91c1c;
+  --color-red-400: #dc2626;
+  --color-red-500: #b91c1c;
+  --color-red-600: #991b1b;
+  --color-amber-200: #92400e;
+  --color-amber-400: #b45309;
+  --color-amber-950: #fef3c7;
+
+  /* Accent surfaces (gradients/buttons) → light so paired text inverts. */
+  --color-purple-950: #f7f7f8;
+  --color-purple-700: #e9e9ec;
+  --color-purple-600: #e0e0e4;
+  --color-purple-500: #d2d2d8;
+  --color-blue-600: #e0e0e4;
+  --color-blue-500: #d2d2d8;
+  --color-cyan-950: #f7f7f8;
+  --color-cyan-600: #e0e0e4;
+  --color-cyan-500: #27272a;
+  --color-cyan-400: #3f3f46;
+  --color-green-600: #e0e0e4;
+  --color-green-500: #27272a;
+  --color-green-400: #3f3f46;
+  --color-green-300: #52525b;
+  --color-pink-500: #3f3f46;
+  --color-amber-500: #52525b;
+  --color-amber-300: #78350f;
+}
+
+/* Semantic overrides: explicit white/black text and surfaces. */
+html.light .text-white,
+html.light .hover\:text-white:hover,
+html.light .group:hover .group-hover\:text-white {
+  color: #1a1a1a;
+}
+html.light .text-black {
+  color: #f7f7f8;
+}
+html.light .bg-white {
+  background-color: var(--color-night-800);
+}

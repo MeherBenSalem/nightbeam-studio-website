@@ -14,8 +14,6 @@ export const registerSchema = z
     email: z.string().trim().toLowerCase().email("Enter a valid email address").max(254),
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password").max(128),
-    versions: z.array(z.string().trim().max(16)).max(8).optional().default([]),
-    loaders: z.array(z.string().trim().max(16)).max(8).optional().default([]),
     acceptTerms: z
       .union([z.literal("on"), z.literal("true"), z.literal("1")])
       .optional()

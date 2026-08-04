@@ -433,21 +433,6 @@ export const prismaRepo: DataRepo = {
         displayName: input.name,
       },
     });
-    // Registration preferences land on the user's profile.
-    if (input.preferredVersions?.length || input.preferredLoaders?.length) {
-      await prisma.profile.upsert({
-        where: { userId: row.id },
-        create: {
-          userId: row.id,
-          preferredVersions: input.preferredVersions ?? [],
-          preferredLoaders: input.preferredLoaders ?? [],
-        },
-        update: {
-          preferredVersions: input.preferredVersions ?? [],
-          preferredLoaders: input.preferredLoaders ?? [],
-        },
-      });
-    }
     return toUserDto(row);
   },
 
@@ -1065,12 +1050,42 @@ export const prismaRepo: DataRepo = {
       role: row.role,
       content: row.content,
       topic: row.topic,
+      pinned: row.pinned,
       model: row.model,
       promptTokens: row.promptTokens,
       completionTokens: row.completionTokens,
       durationMs: row.durationMs,
       createdAt: row.createdAt,
     }));
+  },
+
+  async updateChatMessagePin({ messageId, userId = null, guestId = null, pinned }) {
+    const prisma = requireDb();
+    const result = await prisma.chatMessage.updateMany({
+      where: {
+        AND: [
+          { id: messageId },
+          ...(userId ? [{ userId }] : [{ userId: null }]),
+          ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+        ],
+      },
+      data: { pinned },
+    });
+    return result.count > 0;
+  },
+
+  async deleteChatMessage({ messageId, userId = null, guestId = null }) {
+    const prisma = requireDb();
+    const result = await prisma.chatMessage.deleteMany({
+      where: {
+        AND: [
+          { id: messageId },
+          ...(userId ? [{ userId }] : [{ userId: null }]),
+          ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+        ],
+      },
+    });
+    return result.count > 0;
   },
 
   async addChatMessage(input) {

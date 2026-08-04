@@ -233,8 +233,6 @@ export class MemoryDataStore {
     emailVerified?: Date | null;
     role?: Role;
     image?: string | null;
-    preferredVersions?: string[];
-    preferredLoaders?: string[];
   }): MemoryUserRecord {
     const id = uid();
     const email = input.email?.toLowerCase() ?? null;
@@ -254,13 +252,7 @@ export class MemoryDataStore {
       createdAt: new Date(),
       updatedAt: new Date(),
       prefs: defaultPrefs(),
-      profile: {
-        displayName: input.name ?? null,
-        bio: null,
-        website: null,
-        preferredVersions: input.preferredVersions ?? [],
-        preferredLoaders: input.preferredLoaders ?? [],
-      },
+      profile: { displayName: input.name ?? null, bio: null, website: null, preferredVersions: [], preferredLoaders: [] },
     };
     this.users.set(id, user);
     if (email) this.emailIndex.set(email, id);
@@ -877,12 +869,42 @@ export class MemoryDataStore {
       role: input.role,
       content: input.content,
       topic: input.topic ?? null,
+      pinned: false,
       model: input.model ?? "deepseek-chat",
       promptTokens: input.promptTokens ?? 0,
       completionTokens: input.completionTokens ?? 0,
       durationMs: input.durationMs ?? 0,
       createdAt: new Date(),
     });
+  }
+
+  updateChatMessagePin(input: {
+    messageId: string;
+    userId?: string | null;
+    guestId?: string | null;
+    pinned: boolean;
+  }): boolean {
+    const message = this.chatMessages.find(
+      (m) =>
+        m.id === input.messageId &&
+        (input.userId ? m.userId === input.userId : m.userId === null) &&
+        (input.guestId ? m.guestId === input.guestId : m.guestId === null),
+    );
+    if (!message) return false;
+    message.pinned = input.pinned;
+    return true;
+  }
+
+  deleteChatMessage(input: { messageId: string; userId?: string | null; guestId?: string | null }): boolean {
+    const index = this.chatMessages.findIndex(
+      (m) =>
+        m.id === input.messageId &&
+        (input.userId ? m.userId === input.userId : m.userId === null) &&
+        (input.guestId ? m.guestId === input.guestId : m.guestId === null),
+    );
+    if (index === -1) return false;
+    this.chatMessages.splice(index, 1);
+    return true;
   }
 
   listKnowledgeDocs(): ChatbotKnowledgeDocDto[] {

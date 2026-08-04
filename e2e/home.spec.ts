@@ -42,3 +42,19 @@ test("header search supports keyboard selection and escape", async ({ page }) =>
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
 });
+
+test("light/dark theme toggle persists", async ({ page }) => {
+  await page.goto("/");
+  const html = page.locator("html");
+  await expect(html).not.toHaveClass(/light/);
+
+  await page.getByRole("button", { name: "Switch to light mode" }).click();
+  await expect(html).toHaveClass(/light/);
+
+  // Persisted across reloads.
+  await page.reload();
+  await expect(html).toHaveClass(/light/);
+
+  await page.getByRole("button", { name: "Switch to dark mode" }).click();
+  await expect(html).not.toHaveClass(/light/);
+});

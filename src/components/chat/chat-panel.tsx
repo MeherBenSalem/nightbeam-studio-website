@@ -9,8 +9,10 @@ import { publicConfig } from "@/lib/public-config";
 import type { ChatHistoryItem, ChatTier } from "@/lib/chatbot/types";
 
 interface ChatMessage {
+  id?: string;
   role: "user" | "assistant";
   content: string;
+  pinned?: boolean;
 }
 
 export interface ChatQuotaStatus {
@@ -150,11 +152,18 @@ export function ChatPanel({
         setMessages([WELCOME]);
         return;
       }
-      const data = (await response.json()) as { messages?: Array<{ role: string; content: string }> };
+      const data = (await response.json()) as {
+        messages?: Array<{ id?: string; role: string; content: string; pinned?: boolean }>;
+      };
       const history = data.messages ?? [];
       setMessages(
         history.length > 0
-          ? history.map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: m.content }))
+          ? history.map((m) => ({
+              id: m.id,
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+              pinned: Boolean(m.pinned),
+            }))
           : [WELCOME],
       );
     } catch {
@@ -233,6 +242,7 @@ export function ChatPanel({
 
     setMessages((prev) => [...prev, { role: "user", content: message }]);
 
+    let persisted = false;
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -299,6 +309,7 @@ export function ChatPanel({
           }
         }
         if (!assistantStarted) setError(streamError ?? "No response received. Please try again.");
+        if (assistantStarted) persisted = true;
       } else {
         const data = (await response.json()) as {
           reply?: string;
@@ -308,6 +319,7 @@ export function ChatPanel({
         };
         if (data.reply) {
           const reply: string = data.reply;
+          persisted = true;
           setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
           if (data.remaining !== undefined)
             setQuota((prev) => (prev ? { ...prev, remaining: data.remaining ?? 0 } : prev));
@@ -329,6 +341,10 @@ export function ChatPanel({
       setTurnstileNonce((n) => n + 1);
       // The conversation list may have gained/changed a conversation.
       void refreshConversations();
+      // Re-read the conversation so streamed messages get persisted ids
+      // (needed for pin/delete actions). Only when the exchange actually
+      // persisted — quota-rejected messages must stay visible locally.
+      if (persisted) void refreshMessages();
     }
   }
 
@@ -340,6 +356,64 @@ export function ChatPanel({
     setLoginPrompt(false);
     setSidebarOpen(false);
     pinnedRef.current = true;
+  }
+
+  const activeConversationIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeConversationIdRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  // Refresh the visible messages with persisted ids/pins after a stream.
+  const refreshMessages = useCallback(async () => {
+    if (!activeConversationIdRef.current) return;
+    try {
+      const response = await fetch(
+        `/api/chat/history?conversationId=${encodeURIComponent(activeConversationIdRef.current)}`,
+        { cache: "no-store" },
+      );
+      if (!response.ok) return;
+      const data = (await response.json()) as { messages?: Array<{ id?: string; role: string; content: string; pinned?: boolean }> };
+      const history = data.messages ?? [];
+      if (history.length === 0) return;
+      setMessages(
+        history.map((m) => ({
+          id: m.id,
+          role: m.role === "user" ? "user" : "assistant",
+          content: m.content,
+          pinned: Boolean(m.pinned),
+        })),
+      );
+    } catch {
+      // Keep the streamed messages — refresh is best-effort.
+    }
+  }, []);
+
+  async function togglePin(messageId: string, pinned: boolean) {
+    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, pinned } : m)));
+    try {
+      const response = await fetch(`/api/chat/messages/${encodeURIComponent(messageId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned }),
+      });
+      if (!response.ok) throw new Error("pin failed");
+    } catch {
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, pinned: !pinned } : m)));
+      setError("Could not update the message. Please try again.");
+    }
+  }
+
+  async function deleteMessage(messageId: string) {
+    const previous = messages;
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    try {
+      const response = await fetch(`/api/chat/messages/${encodeURIComponent(messageId)}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("delete failed");
+      void refreshConversations();
+    } catch {
+      setMessages(previous);
+      setError("Could not delete the message. Please try again.");
+    }
   }
 
   async function compactAndStartNew() {
@@ -516,14 +590,49 @@ export function ChatPanel({
           <div className={mode === "full" ? "mx-auto w-full max-w-3xl space-y-3 px-4 py-4 sm:px-6" : "space-y-3 px-4 py-4"}>
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={
-                    message.role === "user"
-                      ? "max-w-[85%] whitespace-pre-wrap rounded-lg bg-night-700 px-3 py-2 text-sm text-white"
-                      : "max-w-[85%] rounded-lg border border-night-600 bg-night-850 px-3 py-2 text-sm leading-relaxed text-slate-200"
-                  }
-                >
-                  {message.role === "user" ? message.content : <ChatMarkdown content={message.content} />}
+                <div className="relative max-w-[85%]">
+                  {message.id ? (
+                    <div className="absolute -top-2.5 right-0 flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => void togglePin(message.id as string, !message.pinned)}
+                        aria-label={message.pinned ? "Unpin message" : "Pin message"}
+                        title={message.pinned ? "Unpin" : "Pin"}
+                        className={`rounded p-0.5 transition-colors ${
+                          message.pinned ? "text-pixel-cyan" : "text-slate-500 hover:text-white"
+                        }`}
+                      >
+                        <svg viewBox="0 0 24 24" fill={message.pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden>
+                          <path d="M9 4h6l-1 5 3 3H7l3-3-1-5Z" strokeLinejoin="round" />
+                          <path d="M12 12v8" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteMessage(message.id as string)}
+                        aria-label="Delete message"
+                        title="Delete"
+                        className="rounded p-0.5 text-slate-500 transition-colors hover:text-red-400"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden>
+                          <path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : null}
+                  <div
+                    className={
+                      message.role === "user"
+                        ? `whitespace-pre-wrap rounded-lg bg-night-700 px-3 py-2 text-sm text-white ${
+                            message.pinned ? "border border-pixel-cyan/60" : ""
+                          }`
+                        : `rounded-lg border bg-night-850 px-3 py-2 text-sm leading-relaxed text-slate-200 ${
+                            message.pinned ? "border-pixel-cyan/70" : "border-night-600"
+                          }`
+                    }
+                  >
+                    {message.role === "user" ? message.content : <ChatMarkdown content={message.content} />}
+                  </div>
                 </div>
               </div>
             ))}

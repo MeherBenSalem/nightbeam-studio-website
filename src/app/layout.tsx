@@ -85,6 +85,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang="en" data-scroll-behavior="smooth" className={minecraft.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("nba-theme")==="light"){document.documentElement.classList.add("light");document.querySelector("meta[name=theme-color]")?.setAttribute("content","#f7f7f8")}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-night-950 text-slate-200">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <a

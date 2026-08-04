@@ -280,6 +280,7 @@ export interface ChatMessageDto {
   role: string;
   content: string;
   topic: string | null;
+  pinned: boolean;
   model: string;
   promptTokens: number;
   completionTokens: number;

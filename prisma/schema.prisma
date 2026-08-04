@@ -120,6 +120,7 @@ model ChatMessage {
   role           String
   content        String   @db.Text
   topic          String?
+  pinned         Boolean  @default(false)
   model          String   @default("deepseek-chat")
   promptTokens   Int      @default(0)
   completionTokens Int    @default(0)

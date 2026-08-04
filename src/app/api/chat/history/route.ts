@@ -35,7 +35,13 @@ export async function GET(request: NextRequest) {
     const rows = await repo.listChatMessages({ userId: user.id, conversationId: id, limit: 50 });
     return NextResponse.json({
       conversationId: id,
-      messages: rows.map((row) => ({ role: row.role, content: row.content, createdAt: row.createdAt })),
+      messages: rows.map((row) => ({
+        id: row.id,
+        role: row.role,
+        content: row.content,
+        pinned: row.pinned,
+        createdAt: row.createdAt,
+      })),
     });
   }
 
@@ -50,6 +56,12 @@ export async function GET(request: NextRequest) {
   const rows = await repo.listChatMessages({ guestId, conversationId: id, limit: 50 });
   return NextResponse.json({
     conversationId: id,
-    messages: rows.map((row) => ({ role: row.role, content: row.content, createdAt: row.createdAt })),
+    messages: rows.map((row) => ({
+      id: row.id,
+      role: row.role,
+      content: row.content,
+      pinned: row.pinned,
+      createdAt: row.createdAt,
+    })),
   });
 }

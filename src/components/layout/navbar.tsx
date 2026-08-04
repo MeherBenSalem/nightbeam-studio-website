@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CloseIcon, MenuIcon, SearchIcon } from "@/components/icons";
 import { NotificationCenter } from "@/components/layout/notification-center";
 import { SearchModal } from "@/components/layout/search-modal";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { cn } from "@/lib/utils/cn";
 
@@ -66,6 +67,7 @@ export function Navbar({ user, chatbotEnabled }: { user: NavUser | null; chatbot
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <button
             type="button"
             onClick={() => setSearchOpen(true)}

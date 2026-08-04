@@ -86,8 +86,6 @@ export interface DataRepo {
     email: string;
     passwordHash: string;
     emailVerified?: Date | null;
-    preferredVersions?: string[];
-    preferredLoaders?: string[];
   }): Promise<UserDto>;
   getUserAuthByEmail(email: string): Promise<{ user: UserDto; passwordHash: string | null } | null>;
   getUserById(id: string): Promise<UserDto | null>;
@@ -149,6 +147,13 @@ export interface DataRepo {
     conversationId?: string | null;
     limit?: number;
   }): Promise<ChatMessageDto[]>;
+  updateChatMessagePin(input: {
+    messageId: string;
+    userId?: string | null;
+    guestId?: string | null;
+    pinned: boolean;
+  }): Promise<boolean>;
+  deleteChatMessage(input: { messageId: string; userId?: string | null; guestId?: string | null }): Promise<boolean>;
   addChatMessage(input: {
     conversationId?: string | null;
     userId?: string | null;

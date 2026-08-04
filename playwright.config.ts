@@ -32,7 +32,7 @@ export default defineConfig({
       DEEPSEEK_API_KEY: "e2e-fake-key",
       CHATBOT_KB_ROOTS: "./tests/fixtures/kb",
       // Small compaction threshold so the flow is testable quickly.
-      NEXT_PUBLIC_CHATBOT_COMPACT_AT_TOKENS: "150",
+      NEXT_PUBLIC_CHATBOT_COMPACT_AT_TOKENS: "100",
     },
   },
 });

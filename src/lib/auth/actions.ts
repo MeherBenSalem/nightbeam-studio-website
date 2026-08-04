@@ -42,8 +42,6 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
-    versions: formData.getAll("versions"),
-    loaders: formData.getAll("loaders"),
     acceptTerms: formData.get("acceptTerms"),
     turnstileToken: formData.get("turnstileToken") ?? undefined,
   });
@@ -67,8 +65,6 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     email: parsed.data.email,
     passwordHash,
     emailVerified: autoVerify ? new Date() : null,
-    preferredVersions: parsed.data.versions,
-    preferredLoaders: parsed.data.loaders,
   });
 
   if (!autoVerify) {

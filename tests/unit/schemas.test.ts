@@ -16,17 +16,6 @@ describe("registerSchema", () => {
     if (result.success) {
       expect(result.data.email).toBe("mahou@nightbeam.studio");
       expect(result.data.name).toBe("Mahou");
-      expect(result.data.versions).toEqual([]);
-      expect(result.data.loaders).toEqual([]);
-    }
-  });
-
-  it("accepts version/loader preferences", () => {
-    const result = registerSchema.safeParse({ ...valid, versions: ["26.2", "1.21.1"], loaders: ["FABRIC", "NEOFORGE"] });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.versions).toEqual(["26.2", "1.21.1"]);
-      expect(result.data.loaders).toEqual(["FABRIC", "NEOFORGE"]);
     }
   });
 

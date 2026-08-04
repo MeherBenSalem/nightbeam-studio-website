@@ -7,10 +7,6 @@ import { Checkbox, Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordStrengthMeter } from "@/components/auth/password-strength";
 import { Turnstile } from "@/components/auth/turnstile";
-import { LOADERS, MC_VERSIONS } from "@/lib/utils/url-filters";
-
-// Mod-focused loaders offered at registration (the full list lives in settings).
-const MOD_LOADERS = LOADERS.slice(0, 4);
 
 function FieldError({ errors }: { errors?: string[] }) {
   if (!errors?.length) return null;
@@ -112,30 +108,6 @@ export function RegisterForm() {
           minLength={8}
         />
         <FieldError errors={state.fieldErrors?.confirmPassword} />
-      </div>
-      <div>
-        <Label>Minecraft versions you play</Label>
-        <div className="flex flex-wrap gap-2">
-          {MC_VERSIONS.slice(0, 6).map((version) => (
-            <label key={version} className="flex cursor-pointer items-center gap-1.5 rounded-md border border-night-500/60 bg-night-800 px-2.5 py-1.5 text-xs text-slate-300 hover:border-pixel-cyan/60">
-              <input type="checkbox" name="versions" value={version} className="accent-pixel-cyan" />
-              {version}
-            </label>
-          ))}
-        </div>
-        <p className="mt-1 text-[11px] text-slate-500">Optional — helps us show you the right mods.</p>
-      </div>
-      <div>
-        <Label>Mod loaders you use</Label>
-        <div className="flex flex-wrap gap-2">
-          {MOD_LOADERS.map((loader) => (
-            <label key={loader} className="flex cursor-pointer items-center gap-1.5 rounded-md border border-night-500/60 bg-night-800 px-2.5 py-1.5 text-xs text-slate-300 hover:border-pixel-cyan/60">
-              <input type="checkbox" name="loaders" value={loader} className="accent-pixel-cyan" />
-              {loader[0] + loader.slice(1).toLowerCase()}
-            </label>
-          ))}
-        </div>
-        <p className="mt-1 text-[11px] text-slate-500">Optional — set this later in your dashboard settings.</p>
       </div>
       <div>
         <label className="flex items-start gap-2 text-xs text-slate-300">

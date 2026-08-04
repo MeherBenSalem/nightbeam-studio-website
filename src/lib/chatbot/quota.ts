@@ -36,16 +36,23 @@ export function releaseChatSlot(key: string): void {
   else inFlight.set(key, current - 1);
 }
 
-export async function checkChatQuota(input: ChatQuotaInput): Promise<ChatQuotaResult> {
+export async function checkChatQuota(
+  input: ChatQuotaInput,
+  options: { includeBurst?: boolean } = {},
+): Promise<ChatQuotaResult> {
   const env = getServerEnv();
   const identity = input.userId ?? input.guestId ?? "unknown";
   const proRoles = getProRoles();
   const isPro = input.isPro || (input.role !== null && proRoles.has(input.role));
 
-  // Burst limit applies to everyone (cost protection).
-  const burst = await checkRateLimit(`chat:burst:${identity}`, 5, 60_000);
-  if (!burst.ok) {
-    return { allowed: false, tier: isPro ? "pro" : input.userId ? "free" : "anonymous", used: 0, limit: null, remaining: 0, reason: "burst_limit" };
+  // Burst limit applies to everyone (cost protection). Read-only status
+  // checks (quota display) skip it so they don't consume burst allowance.
+  const includeBurst = options.includeBurst ?? true;
+  if (includeBurst) {
+    const burst = await checkRateLimit(`chat:burst:${identity}`, 5, 60_000);
+    if (!burst.ok) {
+      return { allowed: false, tier: isPro ? "pro" : input.userId ? "free" : "anonymous", used: 0, limit: null, remaining: 0, reason: "burst_limit" };
+    }
   }
 
   if (isPro) {

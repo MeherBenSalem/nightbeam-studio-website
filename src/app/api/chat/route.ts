@@ -7,7 +7,7 @@ import { acquireChatSlot, checkChatQuota, releaseChatSlot } from "@/lib/chatbot/
 import { evaluateTopic } from "@/lib/chatbot/guard";
 import { buildCatalogIndex, getKnowledgeDocs } from "@/lib/chatbot/knowledge";
 import { buildChatMessages, buildKnowledgeBlock, buildSystemPrompt, REFUSAL_MESSAGE } from "@/lib/chatbot/prompt";
-import { chunkAll, retrieveChunks } from "@/lib/chatbot/retrieval";
+import { buildRetrievalQuery, chunkAll, retrieveChunks } from "@/lib/chatbot/retrieval";
 import { streamDeepSeekChat } from "@/lib/chatbot/deepseek";
 import type { ChatHistoryItem, ChatUsage } from "@/lib/chatbot/types";
 import { getServerEnv, isChatbotEnabled } from "@/lib/config/env";
@@ -122,7 +122,16 @@ export async function POST(request: NextRequest) {
         // Knowledge assembly.
         const docs = await getKnowledgeDocs();
         const chunks = chunkAll(docs);
-        const hits = retrieveChunks(parsed.data.message, chunks, 6);
+        // Follow-ups ("no, for the configs") inherit the previous user
+        // message so retrieval targets the same topic.
+        const historyUsers = (parsed.data.history as ChatHistoryItem[])
+          .filter((item) => item.role === "user")
+          .map((item) => item.content);
+        const retrievalQuery = buildRetrievalQuery(
+          parsed.data.message,
+          historyUsers[historyUsers.length - 1],
+        );
+        const hits = retrieveChunks(retrievalQuery, chunks, 8);
         const env = getServerEnv();
         const knowledgeBlock = buildKnowledgeBlock(hits, env.CHATBOT_MAX_CONTEXT_TOKENS);
         const catalogIndex = await buildCatalogIndex();
@@ -189,7 +198,7 @@ export async function POST(request: NextRequest) {
         }
 
         const remaining = quota.remaining > 0 ? quota.remaining - 1 : quota.remaining;
-        controller.enqueue(encodeSSE("done", { usage, remaining }));
+        controller.enqueue(encodeSSE("done", { usage, remaining, tier: quota.tier }));
         controller.close();
       } catch {
         try {

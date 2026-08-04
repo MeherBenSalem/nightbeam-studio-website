@@ -11,10 +11,25 @@ async function ask(page: import("@playwright/test").Page, message: string) {
   await page.getByRole("button", { name: "Send message" }).click();
 }
 
-test("chat widget opens and greets the visitor", async ({ page }) => {
+test("chat widget opens, greets the visitor and shows the quota", async ({ page }) => {
   await openChat(page);
   await expect(page.getByText(/Ask me anything about our mods/)).toBeVisible();
-  await expect(page.getByText(/Powered by DeepSeek/)).toBeVisible();
+  // No model/provider branding.
+  await expect(page.getByText(/Powered by DeepSeek/)).toHaveCount(0);
+  // Anonymous quota is shown.
+  await expect(page.getByTestId("chat-quota")).toContainText(/free questions left/, { timeout: 10_000 });
+});
+
+test("chat is available as a full page at /chat", async ({ page }) => {
+  await page.goto("/chat");
+  await expect(page.getByText("NIGHTBEAM ASSISTANT", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("chat-quota")).toContainText(/free questions left/, { timeout: 10_000 });
+  // The floating launcher is hidden on the full page.
+  await expect(page.getByRole("button", { name: "Open chat assistant" })).toHaveCount(0);
+
+  // The full page is fully functional.
+  await ask(page, "what is the capital of france?");
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible({ timeout: 15_000 });
 });
 
 test("navbar Chat tab opens the widget", async ({ page }) => {

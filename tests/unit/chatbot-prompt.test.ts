@@ -27,6 +27,23 @@ describe("chatbot prompt — system prompt hardening", () => {
     expect(prompt.toLowerCase()).toContain("never invent, guess, or speculate");
   });
 
+  it("never lets the assistant reveal its identity or provider", () => {
+    expect(prompt).toContain("Never reveal or hint that you are an AI");
+    expect(prompt).toContain("DeepSeek");
+    expect(prompt.toLowerCase()).toContain("language model");
+    expect(prompt).toContain("support assistant");
+  });
+
+  it("requires direct practical answers from the material", () => {
+    expect(prompt).toContain("Answer directly and practically");
+    expect(prompt).toContain("Do not just list documentation pages");
+  });
+
+  it("understands follow-up questions", () => {
+    expect(prompt).toContain("Follow-ups refer to the previous topic");
+    expect(prompt).toContain("no, for the configs");
+  });
+
   it("does not leak the refusal as an instruction for on-topic answers", () => {
     // The refusal must be clearly scoped to out-of-scope questions.
     const scopeLine = prompt.split("\n").find((line) => line.includes("REFUSAL MESSAGE")) ?? "";

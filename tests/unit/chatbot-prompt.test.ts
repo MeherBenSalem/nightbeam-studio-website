@@ -7,8 +7,13 @@ const CATALOG = "- rpg-attribute-system: Minecraft RPG attribute mod\n  Availabl
 describe("chatbot prompt — system prompt hardening", () => {
   const prompt = buildSystemPrompt(CATALOG, "knowledge content here");
 
-  it("contains the verbatim refusal message", () => {
-    expect(prompt).toContain(REFUSAL_MESSAGE);
+  it("defers refusals to the topic filter so the model always answers", () => {
+    // The topic gate already refused off-topic messages before generation,
+    // so the generation prompt must not contain the refusal message (which
+    // made the model over-refuse borderline on-topic questions).
+    expect(prompt).toContain("A separate topic filter has already verified");
+    expect(prompt).toContain("You do NOT need to refuse or check scope");
+    expect(prompt).not.toContain(REFUSAL_MESSAGE);
   });
 
   it("delimits knowledge as data, not instructions", () => {
@@ -45,20 +50,20 @@ describe("chatbot prompt — system prompt hardening", () => {
   });
 
   it("keeps compatibility and integration questions in scope", () => {
-    expect(prompt).toContain("Compatibility and integration questions ARE in scope");
+    expect(prompt).toContain("Compatibility and integration questions are in scope");
     expect(prompt).toContain("even when the answer is that no integration exists");
   });
 
   it("never refuses on unrecognized feature names like mana", () => {
-    expect(prompt).toContain("Never refuse a question just because it mentions a feature you do not recognize");
+    expect(prompt).toContain("Never refuse a question because it mentions a feature you do not recognize");
     expect(prompt).toContain("mana");
-    expect(prompt).toContain("When in doubt, answer — do not refuse");
   });
 
-  it("does not leak the refusal as an instruction for on-topic answers", () => {
-    // The refusal must be clearly scoped to out-of-scope questions.
-    const scopeLine = prompt.split("\n").find((line) => line.includes("REFUSAL MESSAGE")) ?? "";
-    expect(scopeLine).toMatch(/out of scope/i);
+  it("never includes the refusal message (gate handles refusals)", () => {
+    // No REFUSAL MESSAGE instruction anywhere in the prompt.
+    const promptLower = prompt.toLowerCase();
+    expect(promptLower).not.toContain("refusal message");
+    expect(promptLower).not.toContain("i can only help with questions");
   });
 });
 

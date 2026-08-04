@@ -274,6 +274,7 @@ export interface ApiErrorDto {
 
 export interface ChatMessageDto {
   id: string;
+  conversationId: string | null;
   userId: string | null;
   guestId: string | null;
   role: string;
@@ -284,6 +285,14 @@ export interface ChatMessageDto {
   completionTokens: number;
   durationMs: number;
   createdAt: Date;
+}
+
+export interface ChatConversationSummaryDto {
+  id: string;
+  title: string;
+  messageCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ChatbotKnowledgeDocDto {

@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+async function register(page: import("@playwright/test").Page, name: string, email: string, password: string) {
+  await page.goto("/auth/register");
+  await page.getByLabel("Display name").fill(name);
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm password").fill(password);
+  await page.getByRole("checkbox", { name: /I agree to the Privacy Policy/ }).check();
+  await page.getByRole("button", { name: "Create account" }).click();
+}
+
 async function openChat(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Open chat assistant" }).click();
@@ -71,11 +81,7 @@ test("anonymous visitors get 2 free questions, then a login prompt", async ({ pa
 test("logged-in users get their saved chat history back", async ({ page }) => {
   // Register + sign in.
   const email = `hist-${Date.now()}@nightbeam.studio`;
-  await page.goto("/auth/register");
-  await page.getByLabel("Display name").fill("History Test");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill("PlaywrightPass1");
-  await page.getByRole("button", { name: "Create account" }).click();
+  await register(page, "History Test", email, "PlaywrightPass1");
   await expect(page.getByText("Account created")).toBeVisible();
 
   await page.goto("/auth/login");
@@ -99,14 +105,68 @@ test("logged-in users get their saved chat history back", async ({ page }) => {
   await expect(page.getByText(/Ask me anything about our mods/)).toHaveCount(0);
 });
 
+test("full-page chat manages multiple conversations in the sidebar", async ({ page }) => {
+  await page.goto("/chat");
+  await expect(page.getByText("NIGHTBEAM ASSISTANT", { exact: true })).toBeVisible();
+
+  // Sidebar with a new-conversation action.
+  await expect(page.getByRole("button", { name: /New conversation/ })).toBeVisible();
+
+  // Ask a question → a conversation titled with the question appears.
+  await ask(page, "what is the capital of france?");
+  await expect(page.getByText(/I can only help with questions about NightBeam Studio/)).toBeVisible({ timeout: 15_000 });
+  const firstItem = page.getByRole("button", { name: /what is the capital of france\?/ });
+  await expect(firstItem).toBeVisible();
+
+  // Start a new conversation → fresh state, old one stays in the sidebar.
+  await page.getByRole("button", { name: /New conversation/ }).click();
+  await expect(page.getByText(/Ask me anything about our mods/)).toBeVisible();
+  await expect(firstItem).toBeVisible();
+
+  // Ask in the second conversation → its messages show, the first
+  // conversation's messages are no longer rendered (exact match = message
+  // bubbles; sidebar titles are separate elements).
+  await ask(page, "how many moons does mars have?");
+  await expect(page.getByText("how many moons does mars have?", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /how many moons does mars have\?/ })).toBeVisible();
+  // The first conversation's message bubble is gone; only its sidebar title remains.
+  await expect(page.getByText("what is the capital of france?", { exact: true })).toHaveCount(1);
+
+  // Switch back to the first conversation.
+  await firstItem.click();
+  await expect(page.getByText("what is the capital of france?", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("how many moons does mars have?", { exact: true })).toHaveCount(1);
+});
+
+test("long conversations prompt to compact and start a new one", async ({ page }) => {
+  await page.goto("/chat");
+  // The e2e threshold is tiny (150 estimated tokens) — two exchanges trigger it.
+  const questions = [
+    "how many planets are in the solar system?",
+    "what is the tallest mountain on earth?",
+    "what is the speed of light?",
+  ];
+  for (let i = 0; i < questions.length; i++) {
+    await ask(page, questions[i]);
+    await expect(page.getByText(/I can only help with questions about NightBeam Studio/).last()).toBeVisible({
+      timeout: 15_000,
+    });
+  }
+
+  const banner = page.getByTestId("chat-compact");
+  await expect(banner).toBeVisible();
+  await banner.getByRole("button", { name: /Compact & start new conversation/ }).click();
+
+  // A fresh conversation opens (summary fallback when the model is fake).
+  await expect(page.getByText(/fresh conversation/)).toBeVisible({ timeout: 15_000 });
+  // Both conversations are in the sidebar.
+  await expect(page.getByRole("button", { name: /how many planets are in the solar system\?/ })).toBeVisible();
+});
+
 test("admin can toggle Pro on a user", async ({ page }) => {
   // Register a regular user first.
   const email = `pro-${Date.now()}@nightbeam.studio`;
-  await page.goto("/auth/register");
-  await page.getByLabel("Display name").fill("Pro Test");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill("PlaywrightPass1");
-  await page.getByRole("button", { name: "Create account" }).click();
+  await register(page, "Pro Test", email, "PlaywrightPass1");
   await expect(page.getByText("Account created")).toBeVisible();
 
   // Sign in as admin and toggle Pro (via /admin so the login carries the callback).

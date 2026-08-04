@@ -8,6 +8,8 @@ test("register, sign in, and sign out", async ({ page }) => {
   await page.getByLabel("Display name").fill("E2E Player");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm password").fill(password);
+  await page.getByRole("checkbox", { name: /I agree to the Privacy Policy/ }).check();
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByText("Account created")).toBeVisible();
 

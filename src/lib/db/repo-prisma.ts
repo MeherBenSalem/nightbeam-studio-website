@@ -433,6 +433,21 @@ export const prismaRepo: DataRepo = {
         displayName: input.name,
       },
     });
+    // Registration preferences land on the user's profile.
+    if (input.preferredVersions?.length || input.preferredLoaders?.length) {
+      await prisma.profile.upsert({
+        where: { userId: row.id },
+        create: {
+          userId: row.id,
+          preferredVersions: input.preferredVersions ?? [],
+          preferredLoaders: input.preferredLoaders ?? [],
+        },
+        update: {
+          preferredVersions: input.preferredVersions ?? [],
+          preferredLoaders: input.preferredLoaders ?? [],
+        },
+      });
+    }
     return toUserDto(row);
   },
 
@@ -979,17 +994,72 @@ export const prismaRepo: DataRepo = {
     return prisma.chatMessage.count({ where: { guestId, role: "user" } });
   },
 
-  async listChatMessages({ userId = null, guestId = null, limit = 50 }) {
+  async listChatConversations({ userId = null, guestId = null }) {
+    const prisma = requireDb();
+    const grouped = await prisma.chatMessage.groupBy({
+      by: ["conversationId"],
+      where: {
+        AND: [
+          { conversationId: { not: null } },
+          ...(userId ? [{ userId }] : [{ userId: null }]),
+          ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+        ],
+      },
+      _count: { _all: true },
+      _min: { createdAt: true },
+      _max: { createdAt: true },
+      orderBy: { _max: { createdAt: "desc" } },
+    });
+    const ids = grouped
+      .map((row) => row.conversationId)
+      .filter((id): id is string => Boolean(id));
+    // First user message per conversation becomes the title.
+    const firsts = ids.length
+      ? await prisma.chatMessage.findMany({
+          where: {
+            AND: [
+              { conversationId: { in: ids } },
+              { role: "user" },
+              ...(userId ? [{ userId }] : [{ userId: null }]),
+              ...(guestId ? [{ guestId }] : [{ guestId: null }]),
+            ],
+          },
+          orderBy: { createdAt: "asc" },
+        })
+      : [];
+    const titleByConv = new Map<string, string>();
+    for (const row of firsts) {
+      if (row.conversationId && !titleByConv.has(row.conversationId)) {
+        titleByConv.set(row.conversationId, row.content.replace(/\s+/g, " ").trim().slice(0, 60));
+      }
+    }
+    return grouped
+      .filter((row) => row.conversationId !== null)
+      .map((row) => ({
+        id: row.conversationId as string,
+        title: titleByConv.get(row.conversationId as string) ?? "New conversation",
+        messageCount: row._count._all,
+        createdAt: row._min.createdAt ?? new Date(),
+        updatedAt: row._max.createdAt ?? new Date(),
+      }));
+  },
+
+  async listChatMessages({ userId = null, guestId = null, conversationId = null, limit = 50 }) {
     const prisma = requireDb();
     const rows = await prisma.chatMessage.findMany({
       where: {
-        AND: [{ ...(userId ? { userId } : { userId: null }) }, { ...(guestId ? { guestId } : { guestId: null }) }],
+        AND: [
+          { ...(userId ? { userId } : { userId: null }) },
+          { ...(guestId ? { guestId } : { guestId: null }) },
+          ...(conversationId ? [{ conversationId }] : []),
+        ],
       },
       orderBy: { createdAt: "desc" },
       take: limit,
     });
     return rows.reverse().map((row) => ({
       id: row.id,
+      conversationId: row.conversationId,
       userId: row.userId,
       guestId: row.guestId,
       role: row.role,
@@ -1007,6 +1077,7 @@ export const prismaRepo: DataRepo = {
     const prisma = requireDb();
     await prisma.chatMessage.create({
       data: {
+        conversationId: input.conversationId ?? null,
         userId: input.userId ?? null,
         guestId: input.guestId ?? null,
         role: input.role,

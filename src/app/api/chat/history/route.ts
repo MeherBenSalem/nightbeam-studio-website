@@ -8,31 +8,48 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Recent chat history for the current identity (logged-in user or the
- * signed guest cookie). Returns messages oldest-first, up to 50.
+ * Chat history for the current identity. With ?conversationId=X it returns
+ * that conversation's messages (oldest-first, up to 50); without it, the
+ * most recent conversation's messages (or an empty list).
  */
 export async function GET(request: NextRequest) {
   if (!isChatbotEnabled()) {
     return NextResponse.json({ enabled: false }, { status: 503 });
   }
 
+  const conversationId = request.nextUrl.searchParams.get("conversationId")?.trim() ?? null;
+  if (conversationId !== null && !/^[a-zA-Z0-9-]{8,80}$/.test(conversationId)) {
+    return NextResponse.json({ messages: [] });
+  }
+
   const user = await requireUser();
   const repo = await getRepo();
 
   if (user) {
-    const rows = await repo.listChatMessages({ userId: user.id, limit: 50 });
+    let id = conversationId;
+    if (!id) {
+      const conversations = await repo.listChatConversations({ userId: user.id });
+      id = conversations[0]?.id ?? null;
+    }
+    if (!id) return NextResponse.json({ messages: [] });
+    const rows = await repo.listChatMessages({ userId: user.id, conversationId: id, limit: 50 });
     return NextResponse.json({
+      conversationId: id,
       messages: rows.map((row) => ({ role: row.role, content: row.content, createdAt: row.createdAt })),
     });
   }
 
-  // Guests: history follows the signed guest cookie (no cookie yet → empty).
-  const existingGuest = parseGuestCookie(request.cookies.get(GUEST_COOKIE)?.value);
-  if (!existingGuest) {
-    return NextResponse.json({ messages: [] });
+  const guestId = parseGuestCookie(request.cookies.get(GUEST_COOKIE)?.value);
+  if (!guestId) return NextResponse.json({ messages: [] });
+  let id = conversationId;
+  if (!id) {
+    const conversations = await repo.listChatConversations({ guestId });
+    id = conversations[0]?.id ?? null;
   }
-  const rows = await repo.listChatMessages({ guestId: existingGuest, limit: 50 });
+  if (!id) return NextResponse.json({ messages: [] });
+  const rows = await repo.listChatMessages({ guestId, conversationId: id, limit: 50 });
   return NextResponse.json({
+    conversationId: id,
     messages: rows.map((row) => ({ role: row.role, content: row.content, createdAt: row.createdAt })),
   });
 }

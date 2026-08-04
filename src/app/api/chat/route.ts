@@ -19,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 const chatRequestSchema = z.object({
   message: z.string().trim().min(1).max(2000),
+  conversationId: z.string().regex(/^[a-zA-Z0-9-]{8,80}$/).optional(),
   history: z
     .array(
       z.object({
@@ -68,6 +69,9 @@ export async function POST(request: NextRequest) {
   const guestId = user ? null : (existingGuest ?? newGuestId());
   const identityKey = user?.id ?? guestId ?? "unknown";
 
+  // Conversations: client-generated id, or a fresh one for the first message.
+  const conversationId = parsed.data.conversationId ?? crypto.randomUUID();
+
   const quota = await checkChatQuota({ userId: user?.id ?? null, guestId: user ? null : guestId, role, isPro });
   if (!quota.allowed) {
     const message =
@@ -95,6 +99,7 @@ export async function POST(request: NextRequest) {
         // Persist the user's question first — quota is counted even when
         // the generation fails (abuse protection).
         await repo.addChatMessage({
+          conversationId,
           userId: user?.id ?? null,
           guestId: user ? null : guestId,
           role: "user",
@@ -107,6 +112,7 @@ export async function POST(request: NextRequest) {
         if (!verdict.allowed) {
           const remaining = quota.remaining > 0 ? quota.remaining - 1 : 0;
           await repo.addChatMessage({
+            conversationId,
             userId: user?.id ?? null,
             guestId: user ? null : guestId,
             role: "assistant",
@@ -185,6 +191,7 @@ export async function POST(request: NextRequest) {
         // Persist the assistant reply for audit + quota bookkeeping.
         if (assistantReply) {
           await repo.addChatMessage({
+            conversationId,
             userId: user?.id ?? null,
             guestId: user ? null : guestId,
             role: "assistant",
@@ -198,7 +205,7 @@ export async function POST(request: NextRequest) {
         }
 
         const remaining = quota.remaining > 0 ? quota.remaining - 1 : quota.remaining;
-        controller.enqueue(encodeSSE("done", { usage, remaining, tier: quota.tier }));
+        controller.enqueue(encodeSSE("done", { usage, remaining, tier: quota.tier, conversationId }));
         controller.close();
       } catch {
         try {

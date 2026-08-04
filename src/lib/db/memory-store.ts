@@ -13,6 +13,7 @@ import type {
   AnnouncementDto,
   AuditLogDto,
   ChatbotKnowledgeDocDto,
+  ChatConversationSummaryDto,
   ChatMessageDto,
   CommunityStatsDto,
   EventType,
@@ -232,6 +233,8 @@ export class MemoryDataStore {
     emailVerified?: Date | null;
     role?: Role;
     image?: string | null;
+    preferredVersions?: string[];
+    preferredLoaders?: string[];
   }): MemoryUserRecord {
     const id = uid();
     const email = input.email?.toLowerCase() ?? null;
@@ -251,7 +254,13 @@ export class MemoryDataStore {
       createdAt: new Date(),
       updatedAt: new Date(),
       prefs: defaultPrefs(),
-      profile: { displayName: input.name ?? null, bio: null, website: null, preferredVersions: [], preferredLoaders: [] },
+      profile: {
+        displayName: input.name ?? null,
+        bio: null,
+        website: null,
+        preferredVersions: input.preferredVersions ?? [],
+        preferredLoaders: input.preferredLoaders ?? [],
+      },
     };
     this.users.set(id, user);
     if (email) this.emailIndex.set(email, id);
@@ -810,15 +819,46 @@ export class MemoryDataStore {
     return this.chatMessages.filter((m) => m.guestId === guestId && m.role === "user").length;
   }
 
-  listChatMessages(input: { userId?: string | null; guestId?: string | null; limit?: number }): ChatMessageDto[] {
+  listChatMessages(input: { userId?: string | null; guestId?: string | null; conversationId?: string | null; limit?: number }): ChatMessageDto[] {
     const limit = input.limit ?? 50;
     return this.chatMessages
       .filter((m) => (input.userId ? m.userId === input.userId : m.userId === null))
       .filter((m) => (input.guestId ? m.guestId === input.guestId : m.guestId === null))
+      .filter((m) => (input.conversationId ? m.conversationId === input.conversationId : true))
       .slice(-limit);
   }
 
+  listChatConversations(input: { userId?: string | null; guestId?: string | null }): ChatConversationSummaryDto[] {
+    const byConv = new Map<string, { messages: ChatMessageDto[] }>();
+    for (const m of this.chatMessages) {
+      const owned =
+        input.userId
+          ? m.userId === input.userId
+          : input.guestId
+            ? m.guestId === input.guestId
+            : m.userId === null && m.guestId === null;
+      if (!owned || !m.conversationId) continue;
+      const entry = byConv.get(m.conversationId) ?? { messages: [] };
+      entry.messages.push(m);
+      byConv.set(m.conversationId, entry);
+    }
+    return [...byConv.entries()]
+      .map(([id, { messages }]) => {
+        messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        const firstUser = messages.find((m) => m.role === "user");
+        return {
+          id,
+          title: firstUser ? firstUser.content.replace(/\s+/g, " ").trim().slice(0, 60) : "New conversation",
+          messageCount: messages.length,
+          createdAt: messages[0].createdAt,
+          updatedAt: messages[messages.length - 1].createdAt,
+        };
+      })
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  }
+
   addChatMessage(input: {
+    conversationId?: string | null;
     userId?: string | null;
     guestId?: string | null;
     role: string;
@@ -831,6 +871,7 @@ export class MemoryDataStore {
   }): void {
     this.chatMessages.push({
       id: uid(),
+      conversationId: input.conversationId ?? null,
       userId: input.userId ?? null,
       guestId: input.guestId ?? null,
       role: input.role,

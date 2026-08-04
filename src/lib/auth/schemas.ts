@@ -8,12 +8,24 @@ export const passwordSchema = z
   .regex(/[A-Z]/, "Password needs an uppercase letter")
   .regex(/[0-9]/, "Password needs a number");
 
-export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Display name must be at least 2 characters").max(48),
-  email: z.string().trim().toLowerCase().email("Enter a valid email address").max(254),
-  password: passwordSchema,
-  turnstileToken: z.string().optional(),
-});
+export const registerSchema = z
+  .object({
+    name: z.string().trim().min(2, "Display name must be at least 2 characters").max(48),
+    email: z.string().trim().toLowerCase().email("Enter a valid email address").max(254),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Please confirm your password").max(128),
+    versions: z.array(z.string().trim().max(16)).max(8).optional().default([]),
+    loaders: z.array(z.string().trim().max(16)).max(8).optional().default([]),
+    acceptTerms: z
+      .union([z.literal("on"), z.literal("true"), z.literal("1")])
+      .optional()
+      .refine((value) => value !== undefined, "You must accept the Privacy Policy to continue"),
+    turnstileToken: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email address").max(254),

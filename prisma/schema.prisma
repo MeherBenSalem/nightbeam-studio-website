@@ -113,20 +113,23 @@ model User {
 }
 
 model ChatMessage {
-  id               String   @id @default(cuid())
-  userId           String?
-  guestId          String?
-  role             String
-  content          String   @db.Text
-  topic            String?
-  model            String   @default("deepseek-chat")
-  promptTokens     Int      @default(0)
-  completionTokens Int      @default(0)
-  durationMs       Int      @default(0)
-  createdAt        DateTime @default(now())
+  id             String   @id @default(cuid())
+  conversationId String?
+  userId         String?
+  guestId        String?
+  role           String
+  content        String   @db.Text
+  topic          String?
+  model          String   @default("deepseek-chat")
+  promptTokens   Int      @default(0)
+  completionTokens Int    @default(0)
+  durationMs     Int      @default(0)
+  createdAt      DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, conversationId, createdAt])
+  @@index([guestId, conversationId, createdAt])
   @@index([userId, createdAt])
   @@index([guestId, createdAt])
 }

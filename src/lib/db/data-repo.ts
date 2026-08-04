@@ -4,6 +4,7 @@ import type {
   ApiErrorDto,
   AuditLogDto,
   ChatbotKnowledgeDocDto,
+  ChatConversationSummaryDto,
   ChatMessageDto,
   CommunityStatsDto,
   ProjectCommentDto,
@@ -80,7 +81,14 @@ export interface DataRepo {
   }): Promise<void>;
   queryAnalytics(input: { type?: EventType; from?: Date; to?: Date; projectId?: string; limit?: number }): Promise<AnalyticsRow[]>;
 
-  createUser(input: { name: string; email: string; passwordHash: string; emailVerified?: Date | null }): Promise<UserDto>;
+  createUser(input: {
+    name: string;
+    email: string;
+    passwordHash: string;
+    emailVerified?: Date | null;
+    preferredVersions?: string[];
+    preferredLoaders?: string[];
+  }): Promise<UserDto>;
   getUserAuthByEmail(email: string): Promise<{ user: UserDto; passwordHash: string | null } | null>;
   getUserById(id: string): Promise<UserDto | null>;
   updateUser(id: string, patch: UserPatch): Promise<UserDto | null>;
@@ -134,12 +142,15 @@ export interface DataRepo {
 
   countChatMessagesByUser(userId: string, since: Date): Promise<number>;
   countChatMessagesByGuest(guestId: string): Promise<number>;
+  listChatConversations(input: { userId?: string | null; guestId?: string | null }): Promise<ChatConversationSummaryDto[]>;
   listChatMessages(input: {
     userId?: string | null;
     guestId?: string | null;
+    conversationId?: string | null;
     limit?: number;
   }): Promise<ChatMessageDto[]>;
   addChatMessage(input: {
+    conversationId?: string | null;
     userId?: string | null;
     guestId?: string | null;
     role: string;

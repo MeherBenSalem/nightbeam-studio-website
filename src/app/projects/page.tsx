@@ -9,9 +9,12 @@ import { parseFilterParams, serializeFilterParams } from "@/lib/utils/url-filter
 
 export const revalidate = 60;
 
+const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Projects",
   description: "Browse the NightBeam Studio catalog — mods, packs, and tools for Minecraft.",
+  alternates: { canonical: `${siteUrl}/projects` },
 };
 
 export default async function ProjectsPage({

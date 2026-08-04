@@ -64,6 +64,9 @@ function toUserDto(row: {
   role: Role;
   isBanned: boolean;
   isPro: boolean;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  stripeSubscriptionStatus: string | null;
   authVersion: number;
   emailVerified: Date | null;
   createdAt: Date;
@@ -77,6 +80,9 @@ function toUserDto(row: {
     role: row.role,
     isBanned: row.isBanned,
     isPro: row.isPro,
+    stripeCustomerId: row.stripeCustomerId,
+    stripeSubscriptionId: row.stripeSubscriptionId,
+    stripeSubscriptionStatus: row.stripeSubscriptionStatus,
     authVersion: row.authVersion,
     emailVerified: row.emailVerified,
     createdAt: row.createdAt,
@@ -449,6 +455,12 @@ export const prismaRepo: DataRepo = {
     return row ? toUserDto(row) : null;
   },
 
+  async getUserByStripeCustomerId(customerId) {
+    const prisma = requireDb();
+    const row = await prisma.user.findUnique({ where: { stripeCustomerId: customerId } });
+    return row ? toUserDto(row) : null;
+  },
+
   async updateUser(id: string, patch: UserPatch) {
     const prisma = requireDb();
     const data: Prisma.UserUpdateInput = {};
@@ -460,6 +472,9 @@ export const prismaRepo: DataRepo = {
     if (patch.role !== undefined) data.role = patch.role as PrismaRole;
     if (patch.isBanned !== undefined) data.isBanned = patch.isBanned;
     if (patch.isPro !== undefined) data.isPro = patch.isPro;
+    if (patch.stripeCustomerId !== undefined) data.stripeCustomerId = patch.stripeCustomerId;
+    if (patch.stripeSubscriptionId !== undefined) data.stripeSubscriptionId = patch.stripeSubscriptionId;
+    if (patch.stripeSubscriptionStatus !== undefined) data.stripeSubscriptionStatus = patch.stripeSubscriptionStatus;
     if (patch.authVersion !== undefined) data.authVersion = patch.authVersion;
     if (patch.displayName !== undefined) data.displayName = patch.displayName;
     if (patch.avatar !== undefined) data.avatar = patch.avatar;

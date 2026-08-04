@@ -79,6 +79,14 @@ const serverEnvSchema = z.object({
   // Comma-separated repo roots whose docs/**/*.md feed the knowledge base
   // (used by `npm run kb:sync` and by the memory-mode fallback loader).
   CHATBOT_KB_ROOTS: z.string().default(""),
+
+  // --- Stripe (optional; Pro membership disabled without keys) ---------
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_ID_PRO: z.string().optional(),
+
+  // --- SEO ------------------------------------------------------------
+  GOOGLE_SITE_VERIFICATION: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -128,4 +136,9 @@ export function isChatbotEnabled(): boolean {
 
 export function getProRoles(): Set<string> {
   return new Set(getServerEnv().CHATBOT_PRO_ROLES.split(",").map((role) => role.trim()).filter(Boolean));
+}
+
+export function isStripeConfigured(): boolean {
+  const env = getServerEnv();
+  return Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_ID_PRO && env.STRIPE_WEBHOOK_SECRET);
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AnnouncementBar } from "@/components/home/announcement-bar";
 import { YouTubeEmbed } from "@/components/home/youtube-embed";
@@ -10,6 +11,12 @@ import { getRepo } from "@/lib/db/repo";
 import { getLatestVideoId } from "@/lib/youtube";
 import { selectHomepageVideoId } from "@/lib/utils/youtube";
 import { formatNumber } from "@/lib/utils/format";
+
+const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+
+export const metadata: Metadata = {
+  alternates: { canonical: siteUrl },
+};
 
 export const revalidate = 60;
 

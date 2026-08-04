@@ -26,6 +26,9 @@ function toUserDto(user: MemoryUserRecord): UserDto {
     role: user.role,
     isBanned: user.isBanned,
     isPro: user.isPro,
+    stripeCustomerId: user.stripeCustomerId,
+    stripeSubscriptionId: user.stripeSubscriptionId,
+    stripeSubscriptionStatus: user.stripeSubscriptionStatus,
     authVersion: user.authVersion,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,
@@ -131,6 +134,12 @@ export const memoryRepo: DataRepo = {
   async getUserById(id) {
     await memoryStore.ensureSeeded();
     const user = memoryStore.getUserById(id);
+    return user ? toUserDto(user) : null;
+  },
+
+  async getUserByStripeCustomerId(customerId) {
+    await memoryStore.ensureSeeded();
+    const user = memoryStore.getUserByStripeCustomerId(customerId);
     return user ? toUserDto(user) : null;
   },
 

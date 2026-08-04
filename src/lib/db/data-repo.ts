@@ -35,6 +35,9 @@ export interface UserPatch {
   role?: Role;
   isBanned?: boolean;
   isPro?: boolean;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripeSubscriptionStatus?: string | null;
   authVersion?: number;
   displayName?: string | null;
   avatar?: string | null;
@@ -89,6 +92,7 @@ export interface DataRepo {
   }): Promise<UserDto>;
   getUserAuthByEmail(email: string): Promise<{ user: UserDto; passwordHash: string | null } | null>;
   getUserById(id: string): Promise<UserDto | null>;
+  getUserByStripeCustomerId(customerId: string): Promise<UserDto | null>;
   updateUser(id: string, patch: UserPatch): Promise<UserDto | null>;
   deleteUser(id: string): Promise<void>;
   listUsers(search: string, page: number, perPage: number): Promise<{ items: UserDto[]; total: number }>;

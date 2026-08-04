@@ -150,6 +150,9 @@ export interface UserDto {
   role: Role;
   isBanned: boolean;
   isPro: boolean;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  stripeSubscriptionStatus: string | null;
   authVersion: number;
   emailVerified: Date | null;
   createdAt: Date;

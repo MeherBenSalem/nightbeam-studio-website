@@ -3,9 +3,12 @@ import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/card";
 import { PixelHeading } from "@/components/ui/pixel-heading";
 
+const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "About",
   description: "NightBeam Studio is a story-first studio building Minecraft mods and worlds.",
+  alternates: { canonical: `${siteUrl}/about` },
 };
 
 const VALUES = [

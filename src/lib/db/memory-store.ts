@@ -45,6 +45,9 @@ export interface MemoryUserRecord {
   role: Role;
   isBanned: boolean;
   isPro: boolean;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  stripeSubscriptionStatus: string | null;
   authVersion: number;
   displayName: string | null;
   avatar: string | null;
@@ -114,6 +117,7 @@ function cloneSeedProject(seed: (typeof SEED_PROJECTS)[number]): ProjectDetail {
 export class MemoryDataStore {
   users = new Map<string, MemoryUserRecord>();
   emailIndex = new Map<string, string>();
+  stripeCustomerIndex = new Map<string, string>();
   accounts = new Map<string, MemoryAccount>();
   accountIndex = new Map<string, string>();
   sessions = new Map<string, MemorySession>();
@@ -203,6 +207,9 @@ export class MemoryDataStore {
       role: "SUPER_ADMIN",
       isBanned: false,
       isPro: true,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      stripeSubscriptionStatus: null,
       authVersion: 1,
       displayName: "NightBeam Admin",
       avatar: null,
@@ -226,6 +233,11 @@ export class MemoryDataStore {
     return this.users.get(id) ?? null;
   }
 
+  getUserByStripeCustomerId(customerId: string): MemoryUserRecord | null {
+    const id = this.stripeCustomerIndex.get(customerId);
+    return id ? this.users.get(id) ?? null : null;
+  }
+
   createUser(input: {
     name?: string | null;
     email?: string | null;
@@ -246,6 +258,9 @@ export class MemoryDataStore {
       role: input.role ?? "USER",
       isBanned: false,
       isPro: false,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      stripeSubscriptionStatus: null,
       authVersion: 1,
       displayName: input.name ?? null,
       avatar: input.image ?? null,
@@ -259,7 +274,28 @@ export class MemoryDataStore {
     return user;
   }
 
-  updateUser(id: string, patch: Partial<Pick<MemoryUserRecord, "name" | "email" | "emailVerified" | "image" | "passwordHash" | "role" | "isBanned" | "isPro" | "authVersion" | "displayName" | "avatar">>): MemoryUserRecord | null {
+  updateUser(
+    id: string,
+    patch: Partial<
+      Pick<
+        MemoryUserRecord,
+        | "name"
+        | "email"
+        | "emailVerified"
+        | "image"
+        | "passwordHash"
+        | "role"
+        | "isBanned"
+        | "isPro"
+        | "stripeCustomerId"
+        | "stripeSubscriptionId"
+        | "stripeSubscriptionStatus"
+        | "authVersion"
+        | "displayName"
+        | "avatar"
+      >
+    >,
+  ): MemoryUserRecord | null {
     const user = this.users.get(id);
     if (!user) return null;
     if (patch.email && patch.email !== user.email) {
@@ -274,6 +310,13 @@ export class MemoryDataStore {
     if (patch.role !== undefined) user.role = patch.role;
     if (patch.isBanned !== undefined) user.isBanned = patch.isBanned;
     if (patch.isPro !== undefined) user.isPro = patch.isPro;
+    if (patch.stripeCustomerId !== undefined) {
+      if (user.stripeCustomerId) this.stripeCustomerIndex.delete(user.stripeCustomerId);
+      user.stripeCustomerId = patch.stripeCustomerId;
+      if (user.stripeCustomerId) this.stripeCustomerIndex.set(user.stripeCustomerId, id);
+    }
+    if (patch.stripeSubscriptionId !== undefined) user.stripeSubscriptionId = patch.stripeSubscriptionId;
+    if (patch.stripeSubscriptionStatus !== undefined) user.stripeSubscriptionStatus = patch.stripeSubscriptionStatus;
     if (patch.authVersion !== undefined) user.authVersion = patch.authVersion;
     if (patch.displayName !== undefined) user.displayName = patch.displayName;
     if (patch.avatar !== undefined) user.avatar = patch.avatar;
@@ -285,6 +328,7 @@ export class MemoryDataStore {
     const user = this.users.get(id);
     if (!user) return;
     if (user.email) this.emailIndex.delete(user.email.toLowerCase());
+    if (user.stripeCustomerId) this.stripeCustomerIndex.delete(user.stripeCustomerId);
     this.users.delete(id);
     for (const [accountId, account] of this.accounts) {
       if (account.userId === id) {
@@ -956,6 +1000,9 @@ function toUserDto(user: MemoryUserRecord): UserDto {
     role: user.role,
     isBanned: user.isBanned,
     isPro: user.isPro,
+    stripeCustomerId: user.stripeCustomerId,
+    stripeSubscriptionId: user.stripeSubscriptionId,
+    stripeSubscriptionStatus: user.stripeSubscriptionStatus,
     authVersion: user.authVersion,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,

@@ -43,6 +43,10 @@ export const metadata: Metadata = {
     description: "Story-driven Minecraft mods and worlds by NightBeam Studio.",
   },
   robots: { index: true, follow: true },
+  alternates: { canonical: siteUrl },
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport: Viewport = {

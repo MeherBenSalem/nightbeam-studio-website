@@ -5,9 +5,12 @@ import { PixelHeading } from "@/components/ui/pixel-heading";
 import { getRepo } from "@/lib/db/repo";
 import { renderMarkdown } from "@/lib/utils/markdown";
 
+const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Documentation",
   description: "Guides for installing and playing NightBeam Studio mods, plus server and configuration docs.",
+  alternates: { canonical: `${siteUrl}/docs` },
 };
 
 const FAQ = [

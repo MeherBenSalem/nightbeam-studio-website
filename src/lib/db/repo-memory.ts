@@ -51,6 +51,36 @@ export const memoryRepo: DataRepo = {
     memoryStore.upsertCurseForgeProject(detail);
   },
 
+  async listStoreProducts(filters) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.listStoreProducts(filters);
+  },
+
+  async getStoreProductBySlug(slug, userId?) {
+    await memoryStore.ensureSeeded();
+    const product = memoryStore.getStoreProductDetail(slug);
+    if (!product) return null;
+    if (userId) {
+      const buyerId = memoryStore.getUserProviderAccountId(userId, "builtbybit");
+      if (buyerId) {
+        const { getLicensedResourceIds } = await import("@/lib/builtbybit/licenses");
+        const owned = await getLicensedResourceIds(buyerId);
+        product.isOwned = owned.has(product.builtbybitId);
+      }
+    }
+    return product;
+  },
+
+  async upsertStoreProduct(detail) {
+    await memoryStore.ensureSeeded();
+    memoryStore.upsertStoreProduct(detail);
+  },
+
+  async getUserProviderAccountId(userId, provider) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.getUserProviderAccountId(userId, provider);
+  },
+
   async getFeaturedProjects(limit = 6) {
     await memoryStore.ensureSeeded();
     return memoryStore.getFeaturedSummaries(limit);

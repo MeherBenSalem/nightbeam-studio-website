@@ -9,6 +9,7 @@ export default async function AdminSyncPage() {
   if (!user) return null;
   const repo = await getRepo();
   const [syncState, cacheStats] = await Promise.all([repo.getSyncState("curseforge"), import("@/lib/curseforge/cache").then((m) => m.getCacheStats())]);
+  const builtbybitSyncState = await repo.getSyncState("builtbybit");
   return (
     <div className="space-y-6">
       <Card>
@@ -35,6 +36,31 @@ export default async function AdminSyncPage() {
             </div>
           </dl>
           <SyncPanel />
+        </CardBody>
+      </Card>
+      <Card>
+        <CardBody>
+          <h2 className="font-semibold text-white">BuiltByBit sync</h2>
+          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-slate-500">Status</dt>
+              <dd className={`mt-1 font-semibold ${builtbybitSyncState.status === "SUCCESS" ? "text-pixel-green" : builtbybitSyncState.status === "ERROR" ? "text-red-400" : builtbybitSyncState.status === "RUNNING" ? "text-pixel-cyan" : "text-slate-300"}`}>
+                {builtbybitSyncState.status}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-slate-500">Message</dt>
+              <dd className="mt-1 text-slate-300">{builtbybitSyncState.message ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-slate-500">Products synced</dt>
+              <dd className="mt-1 text-slate-300">{builtbybitSyncState.projectsSynced}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-slate-500">Last run</dt>
+              <dd className="mt-1 text-slate-300">{builtbybitSyncState.lastRunAt?.toISOString() ?? "never"}</dd>
+            </div>
+          </dl>
         </CardBody>
       </Card>
       <Card>

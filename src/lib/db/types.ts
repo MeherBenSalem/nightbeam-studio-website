@@ -310,3 +310,63 @@ export interface ChatbotKnowledgeDocDto {
   filePath: string | null;
   updatedAt: Date;
 }
+
+export type StoreCategory = "plugins" | "models" | "configs" | "setups" | "other";
+
+export interface StoreProductVersionDto {
+  id: string;
+  builtbybitId: number;
+  version: string;
+  downloadCount: number;
+  releaseDate: Date;
+  isLatest: boolean;
+}
+
+export interface StoreProductSummary {
+  id: string;
+  builtbybitId: number;
+  slug: string;
+  name: string;
+  summary: string;
+  category: StoreCategory;
+  categoryLabel: string | null;
+  url: string;
+  iconUrl: string | null;
+  bannerUrl: string | null;
+  listPrice: number;
+  finalPrice: number;
+  currency: string;
+  purchases: number;
+  downloads: number;
+  rating: number;
+  reviewCount: number;
+  isFree: boolean;
+  latestVersion: string | null;
+  status: string;
+  featured: boolean;
+  lastSyncedAt: Date | null;
+  publishedAt: Date | null;
+  updatedAt: Date;
+}
+
+export interface StoreProductDetail extends StoreProductSummary {
+  description: string;
+  versions: StoreProductVersionDto[];
+  isOwned?: boolean;
+}
+
+export interface StoreFilters {
+  category?: StoreCategory;
+  search?: string;
+  sort?: "purchases" | "price" | "updated" | "name" | "downloads";
+  page?: number;
+  perPage?: number;
+}
+
+export interface StoreListResult {
+  items: StoreProductSummary[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+}

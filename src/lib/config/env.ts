@@ -41,6 +41,13 @@ const serverEnvSchema = z.object({
   CURSEFORGE_AUTHOR_ID: z.string().optional(),
   CURSEFORGE_SEARCH_TERM: z.string().optional(),
   CURSEFORGE_GAME_ID: z.coerce.number().default(432),
+  BUILTBYBIT_API_TOKEN: z.string().optional(),
+  BUILTBYBIT_CLIENT_ID: z.string().optional(),
+  BUILTBYBIT_CLIENT_SECRET: z.string().optional(),
+  BUILTBYBIT_STORE_ID: z.coerce.number().default(272),
+  BUILTBYBIT_MEMBER_ID: z.coerce.number().default(617578),
+  AUTH_BUILTBYBIT_ID: z.string().optional(),
+  AUTH_BUILTBYBIT_SECRET: z.string().optional(),
   YOUTUBE_VIDEO_ID: z.string().optional(),
   YOUTUBE_CHANNEL_HANDLE: z.string().default("@nightbeamstudio"),
   GOOGLE_API_KEY: z.string().optional(),
@@ -141,4 +148,15 @@ export function getProRoles(): Set<string> {
 export function isStripeConfigured(): boolean {
   const env = getServerEnv();
   return Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_ID_PRO && env.STRIPE_WEBHOOK_SECRET);
+}
+
+export function isBuiltByBitConfigured(): boolean {
+  return Boolean(getServerEnv().BUILTBYBIT_API_TOKEN);
+}
+
+export function isBuiltByBitOAuthConfigured(): boolean {
+  const env = getServerEnv();
+  const clientId = env.BUILTBYBIT_CLIENT_ID ?? env.AUTH_BUILTBYBIT_ID;
+  const clientSecret = env.BUILTBYBIT_CLIENT_SECRET ?? env.AUTH_BUILTBYBIT_SECRET;
+  return Boolean(clientId && clientSecret);
 }

@@ -39,6 +39,7 @@ export async function Footer() {
             <h2 className="font-pixel text-xs text-pixel-cyan">SITE</h2>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link className="text-slate-400 hover:text-white" href="/projects">Projects</Link></li>
+              <li><Link className="text-slate-400 hover:text-white" href="/store">Store</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/docs">Documentation</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/about">About</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/community">Membership</Link></li>

@@ -22,6 +22,9 @@ import type {
   Role,
   SiteStatsDto,
   SocialLinkDto,
+  StoreFilters,
+  StoreListResult,
+  StoreProductDetail,
   SyncStateDto,
   UserDto,
 } from "@/lib/db/types";
@@ -64,6 +67,10 @@ export interface DataRepo {
   listProjects(filters: ProjectFilters): Promise<ProjectListResult>;
   getProjectBySlug(slug: string, userId?: string | null): Promise<ProjectDetail | null>;
   upsertCurseForgeProject(detail: ProjectDetail): Promise<void>;
+  listStoreProducts(filters: StoreFilters): Promise<StoreListResult>;
+  getStoreProductBySlug(slug: string, userId?: string | null): Promise<StoreProductDetail | null>;
+  upsertStoreProduct(detail: StoreProductDetail): Promise<void>;
+  getUserProviderAccountId(userId: string, provider: string): Promise<string | null>;
   getFeaturedProjects(limit?: number): Promise<ProjectSummary[]>;
   getSiteStats(): Promise<SiteStatsDto>;
   getCommunityStats(): Promise<CommunityStatsDto>;

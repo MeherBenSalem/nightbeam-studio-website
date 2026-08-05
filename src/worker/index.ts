@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { getServerEnv } from "@/lib/config/env";
+import { runBuiltByBitSync } from "@/lib/builtbybit/sync";
 import { runCurseForgeSync } from "@/lib/curseforge/sync";
 import { runDigestJob } from "@/lib/notifications/digest";
 
@@ -14,14 +15,14 @@ async function main() {
   console.log(`[worker] starting (sync=${env.SYNC_ENABLED}, digest cron=${env.CRON_DIGEST})`);
 
   if (env.SYNC_ENABLED) {
-    cron.schedule(env.CRON_SYNC, () => guard("curseforge-sync", async () => {
-      await runCurseForgeSync();
+    cron.schedule(env.CRON_SYNC, () => guard("catalog-sync", async () => {
+      await Promise.all([runCurseForgeSync(), runBuiltByBitSync()]);
     }), { timezone: "UTC" });
-    guard("curseforge-sync-initial", async () => {
-      await runCurseForgeSync();
+    guard("catalog-sync-initial", async () => {
+      await Promise.all([runCurseForgeSync(), runBuiltByBitSync()]);
     });
   } else {
-    console.log("[worker] CurseForge sync disabled by SYNC_ENABLED=false");
+    console.log("[worker] Catalog sync disabled by SYNC_ENABLED=false");
   }
 
   cron.schedule(env.CRON_DIGEST, () => guard("digest", async () => {

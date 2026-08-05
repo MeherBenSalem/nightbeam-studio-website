@@ -2,7 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import Discord from "next-auth/providers/discord";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
-import { isOAuthConfigured } from "@/lib/config/env";
+import { BuiltByBitProvider } from "@/lib/auth/providers/builtbybit";
+import { isBuiltByBitOAuthConfigured, isOAuthConfigured } from "@/lib/config/env";
 
 // Edge-safe Auth.js configuration used by middleware. The credentials
 // provider and data adapter live in auth.ts (Node runtime).
@@ -45,6 +46,7 @@ export const authConfig: NextAuthConfig = {
           }),
         ]
       : []),
+    ...(isBuiltByBitOAuthConfigured() ? [BuiltByBitProvider()] : []),
   ],
   callbacks: {
     jwt({ token, user }) {

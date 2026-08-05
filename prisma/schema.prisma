@@ -591,3 +591,49 @@ model SocialLink {
   sortOrder Int            @default(0)
   updatedAt DateTime       @updatedAt
 }
+
+model StoreProduct {
+  id            String   @id
+  builtbybitId  Int      @unique
+  slug          String   @unique
+  name          String
+  summary       String   @db.Text
+  description   String   @db.Text
+  category      String
+  categoryLabel String?
+  url           String
+  iconUrl       String?
+  bannerUrl     String?
+  listPrice     Float    @default(0)
+  finalPrice    Float    @default(0)
+  currency      String   @default("USD")
+  purchases     Int      @default(0)
+  downloads     Int      @default(0)
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0)
+  isFree        Boolean  @default(false)
+  latestVersion String?
+  status        String   @default("ACTIVE")
+  featured      Boolean  @default(false)
+  lastSyncedAt  DateTime?
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  versions StoreProductVersion[]
+}
+
+model StoreProductVersion {
+  id            String   @id @default(cuid())
+  productId     String
+  builtbybitId  Int
+  version       String
+  downloadCount Int      @default(0)
+  releaseDate   DateTime
+  isLatest      Boolean  @default(false)
+
+  product StoreProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, builtbybitId])
+  @@index([productId])
+}

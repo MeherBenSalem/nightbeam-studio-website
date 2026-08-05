@@ -30,6 +30,12 @@ import type {
   Role,
   SiteStatsDto,
   SocialLinkDto,
+  StoreCategory,
+  StoreFilters,
+  StoreListResult,
+  StoreProductDetail,
+  StoreProductSummary,
+  StoreProductVersionDto,
   SyncStateDto,
   UserDto,
 } from "@/lib/db/types";
@@ -98,6 +104,56 @@ const DEFAULT_PREFS: NotificationPreferenceDto = {
   comments: true,
   announcements: true,
 };
+
+type StoreProductRow = Prisma.StoreProductGetPayload<{ include: { versions: true } }>;
+
+function mapStoreSummary(row: StoreProductRow): StoreProductSummary {
+  return {
+    id: row.id,
+    builtbybitId: row.builtbybitId,
+    slug: row.slug,
+    name: row.name,
+    summary: row.summary,
+    category: row.category as StoreCategory,
+    categoryLabel: row.categoryLabel,
+    url: row.url,
+    iconUrl: row.iconUrl,
+    bannerUrl: row.bannerUrl,
+    listPrice: row.listPrice,
+    finalPrice: row.finalPrice,
+    currency: row.currency,
+    purchases: row.purchases,
+    downloads: row.downloads,
+    rating: row.rating,
+    reviewCount: row.reviewCount,
+    isFree: row.isFree,
+    latestVersion: row.latestVersion,
+    status: row.status,
+    featured: row.featured,
+    lastSyncedAt: row.lastSyncedAt,
+    publishedAt: row.publishedAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function mapStoreDetail(row: StoreProductRow, isOwned?: boolean): StoreProductDetail {
+  const versions: StoreProductVersionDto[] = row.versions
+    .sort((a, b) => b.releaseDate.getTime() - a.releaseDate.getTime())
+    .map((version) => ({
+      id: version.id,
+      builtbybitId: version.builtbybitId,
+      version: version.version,
+      downloadCount: version.downloadCount,
+      releaseDate: version.releaseDate,
+      isLatest: version.isLatest,
+    }));
+  return {
+    ...mapStoreSummary(row),
+    description: row.description,
+    versions,
+    ...(isOwned !== undefined ? { isOwned } : {}),
+  };
+}
 
 export const prismaRepo: DataRepo = {
   async listProjects(filters: ProjectFilters = {}): Promise<ProjectListResult> {
@@ -271,6 +327,130 @@ export const prismaRepo: DataRepo = {
         });
       }
     });
+  },
+
+  async listStoreProducts(filters: StoreFilters = {}): Promise<StoreListResult> {
+    const prisma = requireDb();
+    const page = filters.page ?? 1;
+    const perPage = filters.perPage ?? 12;
+    const where: Prisma.StoreProductWhereInput = {};
+    if (filters.category) where.category = filters.category;
+    if (filters.search) {
+      const q = filters.search;
+      where.OR = [
+        { name: { contains: q, mode: "insensitive" } },
+        { summary: { contains: q, mode: "insensitive" } },
+        { categoryLabel: { contains: q, mode: "insensitive" } },
+      ];
+    }
+    const orderBy: Prisma.StoreProductOrderByWithRelationInput =
+      filters.sort === "name"
+        ? { name: "asc" }
+        : filters.sort === "price"
+          ? { finalPrice: "asc" }
+          : filters.sort === "updated"
+            ? { updatedAt: "desc" }
+            : filters.sort === "downloads"
+              ? { downloads: "desc" }
+              : { purchases: "desc" };
+    const [rows, total] = await Promise.all([
+      prisma.storeProduct.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        include: { versions: true },
+      }),
+      prisma.storeProduct.count({ where }),
+    ]);
+    return {
+      items: rows.map(mapStoreSummary),
+      total,
+      page,
+      perPage,
+      totalPages: Math.max(1, Math.ceil(total / perPage)),
+    };
+  },
+
+  async getStoreProductBySlug(slug: string, userId?: string | null): Promise<StoreProductDetail | null> {
+    const prisma = requireDb();
+    const row = await prisma.storeProduct.findUnique({
+      where: { slug },
+      include: { versions: true },
+    });
+    if (!row) return null;
+
+    let isOwned: boolean | undefined;
+    if (userId) {
+      const account = await prisma.account.findFirst({
+        where: { userId, provider: "builtbybit" },
+        select: { providerAccountId: true },
+      });
+      if (account?.providerAccountId) {
+        const { getLicensedResourceIds } = await import("@/lib/builtbybit/licenses");
+        const owned = await getLicensedResourceIds(account.providerAccountId);
+        isOwned = owned.has(row.builtbybitId);
+      }
+    }
+    return mapStoreDetail(row, isOwned);
+  },
+
+  async upsertStoreProduct(detail: StoreProductDetail): Promise<void> {
+    const prisma = requireDb();
+    const baseData = {
+      builtbybitId: detail.builtbybitId,
+      slug: detail.slug,
+      name: detail.name,
+      summary: detail.summary,
+      description: detail.description,
+      category: detail.category,
+      categoryLabel: detail.categoryLabel,
+      url: detail.url,
+      iconUrl: detail.iconUrl,
+      bannerUrl: detail.bannerUrl,
+      listPrice: detail.listPrice,
+      finalPrice: detail.finalPrice,
+      currency: detail.currency,
+      purchases: detail.purchases,
+      downloads: detail.downloads,
+      rating: detail.rating,
+      reviewCount: detail.reviewCount,
+      isFree: detail.isFree,
+      latestVersion: detail.latestVersion,
+      status: detail.status,
+      featured: detail.featured,
+      lastSyncedAt: detail.lastSyncedAt ?? new Date(),
+      publishedAt: detail.publishedAt,
+    };
+    await prisma.$transaction(async (tx) => {
+      const productRow = await tx.storeProduct.upsert({
+        where: { builtbybitId: detail.builtbybitId },
+        create: { id: detail.id, ...baseData },
+        update: baseData,
+      });
+      await tx.storeProductVersion.deleteMany({ where: { productId: productRow.id } });
+      for (const version of detail.versions) {
+        await tx.storeProductVersion.create({
+          data: {
+            productId: productRow.id,
+            builtbybitId: version.builtbybitId,
+            version: version.version,
+            downloadCount: version.downloadCount,
+            releaseDate: version.releaseDate,
+            isLatest: version.isLatest,
+          },
+        });
+      }
+    });
+  },
+
+  async getUserProviderAccountId(userId: string, provider: string): Promise<string | null> {
+    const prisma = requireDb();
+    const account = await prisma.account.findFirst({
+      where: { userId, provider },
+      select: { providerAccountId: true },
+    });
+    return account?.providerAccountId ?? null;
   },
 
   async getFeaturedProjects(limit = 6): Promise<ProjectSummary[]> {

@@ -19,6 +19,11 @@ export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOpt
   return d.toLocaleDateString("en-US", options ?? { year: "numeric", month: "short", day: "numeric" });
 }
 
+export function formatPrice(value: number, currency = "USD"): string {
+  if (value <= 0) return "Free";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(value);
+}
+
 export function timeAgo(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const seconds = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));

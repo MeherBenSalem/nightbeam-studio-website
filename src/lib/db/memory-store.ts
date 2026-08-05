@@ -8,6 +8,7 @@ import {
   SEED_SOCIALS,
   SEED_TAGS,
 } from "@/lib/db/catalog";
+import { BBB_FIXTURE_PRODUCTS } from "@/lib/builtbybit/fixtures";
 import type {
   AnalyticsRow,
   AnnouncementDto,
@@ -29,6 +30,10 @@ import type {
   ProjectSummary,
   Role,
   SocialLinkDto,
+  StoreFilters,
+  StoreListResult,
+  StoreProductDetail,
+  StoreProductSummary,
   SyncStateDto,
   UserDto,
 } from "@/lib/db/types";
@@ -127,6 +132,8 @@ export class MemoryDataStore {
 
   projects = new Map<string, ProjectDetail>();
   slugIndex = new Map<string, string>();
+  storeProducts = new Map<string, StoreProductDetail>();
+  storeSlugIndex = new Map<string, string>();
   categories = new Map<string, { slug: string; name: string }>();
   tags = new Map<string, { slug: string; name: string }>();
 
@@ -187,6 +194,12 @@ export class MemoryDataStore {
         url: social.url,
         sortOrder: social.sortOrder,
       });
+    }
+    if (!getServerEnv().BUILTBYBIT_API_TOKEN) {
+      for (const product of BBB_FIXTURE_PRODUCTS) {
+        this.storeProducts.set(product.id, structuredClone(product));
+        this.storeSlugIndex.set(product.slug, product.id);
+      }
     }
     await this.seedAdminUser();
     this.seeded = true;
@@ -843,6 +856,91 @@ export class MemoryDataStore {
     for (const tag of detail.tags) {
       if (!this.tags.has(tag.slug)) this.tags.set(tag.slug, tag);
     }
+  }
+
+  private toStoreSummary(detail: StoreProductDetail): StoreProductSummary {
+    return {
+      id: detail.id,
+      builtbybitId: detail.builtbybitId,
+      slug: detail.slug,
+      name: detail.name,
+      summary: detail.summary,
+      category: detail.category,
+      categoryLabel: detail.categoryLabel,
+      url: detail.url,
+      iconUrl: detail.iconUrl,
+      bannerUrl: detail.bannerUrl,
+      listPrice: detail.listPrice,
+      finalPrice: detail.finalPrice,
+      currency: detail.currency,
+      purchases: detail.purchases,
+      downloads: detail.downloads,
+      rating: detail.rating,
+      reviewCount: detail.reviewCount,
+      isFree: detail.isFree,
+      latestVersion: detail.latestVersion,
+      status: detail.status,
+      featured: detail.featured,
+      lastSyncedAt: detail.lastSyncedAt,
+      publishedAt: detail.publishedAt,
+      updatedAt: detail.updatedAt,
+    };
+  }
+
+  listStoreProducts(filters: StoreFilters = {}): StoreListResult {
+    const page = filters.page ?? 1;
+    const perPage = filters.perPage ?? 12;
+    let items = [...this.storeProducts.values()].map((product) => this.toStoreSummary(product));
+
+    if (filters.category) items = items.filter((p) => p.category === filters.category);
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      items = items.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.summary.toLowerCase().includes(q) ||
+          (p.categoryLabel ?? "").toLowerCase().includes(q),
+      );
+    }
+
+    const sort = filters.sort ?? "purchases";
+    items.sort((a, b) => {
+      if (sort === "name") return a.name.localeCompare(b.name);
+      if (sort === "price") return a.finalPrice - b.finalPrice;
+      if (sort === "updated") return b.updatedAt.getTime() - a.updatedAt.getTime();
+      if (sort === "downloads") return b.downloads - a.downloads;
+      return b.purchases - a.purchases;
+    });
+
+    const total = items.length;
+    const totalPages = Math.max(1, Math.ceil(total / perPage));
+    const start = (page - 1) * perPage;
+    return { items: items.slice(start, start + perPage), total, page, perPage, totalPages };
+  }
+
+  getStoreProductDetail(slug: string): StoreProductDetail | null {
+    const id = this.storeSlugIndex.get(slug);
+    if (!id) return null;
+    const product = this.storeProducts.get(id);
+    return product ? structuredClone(product) : null;
+  }
+
+  upsertStoreProduct(detail: StoreProductDetail): void {
+    const existingId = this.storeSlugIndex.get(detail.slug);
+    if (existingId && existingId !== detail.id) {
+      this.storeProducts.delete(existingId);
+    }
+    this.storeProducts.set(detail.id, structuredClone(detail));
+    this.storeSlugIndex.set(detail.slug, detail.id);
+  }
+
+  getUserProviderAccountId(userId: string, provider: string): string | null {
+    for (const account of this.accounts.values()) {
+      if (account.userId === userId && account.provider === provider) {
+        return account.providerAccountId;
+      }
+    }
+    return null;
   }
 
   // --- Chatbot -------------------------------------------------------

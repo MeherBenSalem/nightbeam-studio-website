@@ -3,6 +3,8 @@ import { getRepo } from "@/lib/db/repo";
 import type { ProjectSummary, StoreProductSummary } from "@/lib/db/types";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo/site";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 100;
 
 async function listAllProjects(repo: Awaited<ReturnType<typeof getRepo>>): Promise<ProjectSummary[]> {

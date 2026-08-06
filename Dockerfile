@@ -8,6 +8,8 @@ COPY prisma ./prisma
 RUN npm ci
 
 FROM base AS builder
+ARG APP_URL=http://localhost:3000
+ENV APP_URL=$APP_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate && npm run build

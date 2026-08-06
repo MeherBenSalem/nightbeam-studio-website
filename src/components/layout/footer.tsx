@@ -14,7 +14,7 @@ export async function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/nb-logo.png" alt="" className="h-8 w-8 rounded-md object-contain" />
+              <img src="/nb-logo.png" alt="NightBeam Studio" className="h-8 w-8 rounded-md object-contain" />
               <span className="font-pixel text-sm text-white">NIGHTBEAM STUDIO</span>
             </div>
             <p className="mt-4 max-w-md text-sm text-slate-400">

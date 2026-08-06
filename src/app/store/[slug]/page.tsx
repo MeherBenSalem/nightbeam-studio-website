@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/state";
 import { StoreCta } from "@/components/store/store-cta";
 import { requireUser } from "@/lib/auth/guards";
 import { getRepo } from "@/lib/db/repo";
+import { absoluteUrl, productJsonLd } from "@/lib/seo/site";
 import { formatDate, formatNumber } from "@/lib/utils/format";
 
 export const revalidate = 60;
@@ -15,13 +16,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const repo = await getRepo();
   const product = await repo.getStoreProductBySlug(slug);
   if (!product) return { title: "Product not found" };
+  const image = product.bannerUrl ?? product.iconUrl ?? undefined;
   return {
     title: product.name,
     description: product.summary,
+    alternates: { canonical: absoluteUrl(`/store/${slug}`) },
     openGraph: {
       title: `${product.name} — NightBeam Store`,
       description: product.summary,
       type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} — NightBeam Store`,
+      description: product.summary,
+      images: image ? [image] : undefined,
     },
   };
 }
@@ -33,12 +43,25 @@ export default async function StoreProductPage({ params }: { params: Promise<{ s
   const product = await repo.getStoreProductBySlug(slug, user?.id);
   if (!product) notFound();
 
+  const jsonLd = productJsonLd({
+    name: product.name,
+    slug: product.slug,
+    summary: product.summary,
+    iconUrl: product.iconUrl,
+    bannerUrl: product.bannerUrl,
+    isFree: product.isFree,
+    finalPrice: product.finalPrice,
+    currency: product.currency,
+  });
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-start gap-6">
         {product.iconUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.iconUrl} alt="" className="h-20 w-20 rounded-xl border border-night-500/60 object-cover" />
+          <img src={product.iconUrl} alt={product.name} className="h-20 w-20 rounded-xl border border-night-500/60 object-cover" />
         ) : (
           <div className="grid h-20 w-20 place-items-center rounded-xl border border-night-500/60 bg-gradient-to-br from-amber-600/40 via-night-800 to-cyan-500/30 font-pixel text-2xl text-white">
             {product.name.slice(0, 1)}
@@ -64,7 +87,7 @@ export default async function StoreProductPage({ params }: { params: Promise<{ s
       {product.bannerUrl ? (
         <div className="mt-8 overflow-hidden rounded-xl border border-night-500/40">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={product.bannerUrl} alt="" className="max-h-72 w-full object-cover" />
+          <img src={product.bannerUrl} alt={product.name} className="max-h-72 w-full object-cover" />
         </div>
       ) : null}
 
@@ -104,5 +127,6 @@ export default async function StoreProductPage({ params }: { params: Promise<{ s
         </section>
       </div>
     </div>
+    </>
   );
 }

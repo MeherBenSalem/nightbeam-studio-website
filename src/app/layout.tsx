@@ -7,6 +7,15 @@ import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth/auth";
 import { getServerEnv, isChatbotEnabled } from "@/lib/config/env";
+import { getRepo } from "@/lib/db/repo";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  SITE_KEYWORDS,
+  getSiteUrl,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/site";
 import "./globals.css";
 
 const minecraft = localFont({
@@ -18,32 +27,32 @@ const minecraft = localFont({
   display: "swap",
 });
 
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "NightBeam Studio — Game Mods & Worlds",
+    default: DEFAULT_TITLE,
     template: "%s · NightBeam Studio",
   },
-  description:
-    "NightBeam Studio crafts story-driven Minecraft mods and worlds. Explore projects, documentation, and membership.",
-  keywords: ["NightBeam Studio", "Minecraft mods", "NeoForge", "Fabric", "Minecraft worlds"],
+  description: DEFAULT_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   openGraph: {
     type: "website",
     url: siteUrl,
     siteName: "NightBeam Studio",
-    title: "NightBeam Studio — Game Mods & Worlds",
-    description: "Story-driven Minecraft mods and worlds by NightBeam Studio.",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     locale: "en_US",
+    images: [{ url: "/opengraph-image" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "NightBeam Studio",
-    description: "Story-driven Minecraft mods and worlds by NightBeam Studio.",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: siteUrl },
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
@@ -57,24 +66,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const session = await auth();
   const env = getServerEnv();
+  const sameAs = [env.COMMUNITY_DISCORD_URL, env.COMMUNITY_YOUTUBE_URL, env.COMMUNITY_GITHUB_URL];
   const jsonLd = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${siteUrl}/#org`,
-        name: env.APP_NAME,
-        url: siteUrl,
-        description: "Story-driven Minecraft mods and worlds.",
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${siteUrl}/#website`,
-        url: siteUrl,
-        name: env.APP_NAME,
-        publisher: { "@id": `${siteUrl}/#org` },
-      },
-    ],
+    "@graph": [organizationJsonLd({ name: env.APP_NAME, sameAs }), websiteJsonLd({ name: env.APP_NAME })],
   };
 
   const user = session?.user
@@ -84,8 +79,19 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         email: session.user.email ?? null,
         image: session.user.image ?? null,
         role: session.user.role ?? "USER",
+        isPro: false,
       }
     : null;
+
+  if (user) {
+    try {
+      const repo = await getRepo();
+      const fresh = await repo.getUserById(user.id);
+      if (fresh) user.isPro = Boolean(fresh.isPro);
+    } catch {
+      // Keep isPro false if the data layer is unavailable.
+    }
+  }
 
   return (
     <html lang="en" data-scroll-behavior="smooth" className={minecraft.variable}>

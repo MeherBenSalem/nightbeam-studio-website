@@ -3,14 +3,14 @@ import Link from "next/link";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/card";
 import { PixelHeading } from "@/components/ui/pixel-heading";
 import { getRepo } from "@/lib/db/repo";
+import { absoluteUrl, faqPageJsonLd } from "@/lib/seo/site";
 import { renderMarkdown } from "@/lib/utils/markdown";
-
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Documentation",
-  description: "Guides for installing and playing NightBeam Studio mods, plus server and configuration docs.",
-  alternates: { canonical: `${siteUrl}/docs` },
+  description:
+    "Install and play NightBeam Studio mods — guides for The Birth of Steve, server setup, configuration, and troubleshooting.",
+  alternates: { canonical: absoluteUrl("/docs") },
 };
 
 const FAQ = [
@@ -40,6 +40,10 @@ export default async function DocsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd(FAQ)) }}
+      />
       <PixelHeading as="h1">Documentation</PixelHeading>
       <p className="mt-4 text-slate-400">
         Everything you need to install, play, and configure NightBeam Studio mods.

@@ -10,12 +10,16 @@ import { StatCounter } from "@/components/ui/stat-counter";
 import { getRepo } from "@/lib/db/repo";
 import { getLatestVideoId } from "@/lib/youtube";
 import { selectHomepageVideoId } from "@/lib/utils/youtube";
+import { absoluteUrl } from "@/lib/seo/site";
 import { formatNumber } from "@/lib/utils/format";
 
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
-
 export const metadata: Metadata = {
-  alternates: { canonical: siteUrl },
+  title: {
+    absolute: "NightBeam Studio — The Birth of Steve & Story-Driven Minecraft Mods",
+  },
+  description:
+    "Home of The Birth of Steve and story-driven Minecraft mods by NightBeam Studio. Explore projects, downloads, docs, and membership.",
+  alternates: { canonical: absoluteUrl("/") },
 };
 
 export const revalidate = 60;

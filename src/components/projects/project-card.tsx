@@ -12,7 +12,7 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
       <div className="flex items-start gap-4">
         {project.iconUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={project.iconUrl} alt="" className="h-14 w-14 rounded-lg border border-night-500/60 object-cover" />
+          <img src={project.iconUrl} alt={project.name} className="h-14 w-14 rounded-lg border border-night-500/60 object-cover" />
         ) : (
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-night-500/60 bg-gradient-to-br from-purple-600/40 via-night-800 to-cyan-500/30 font-pixel text-xl text-white">
             {project.name.slice(0, 1)}

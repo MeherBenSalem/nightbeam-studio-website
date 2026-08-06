@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PixelHeading } from "@/components/ui/pixel-heading";
 
+import { noIndexRobots } from "@/lib/seo/site";
+
 export const metadata: Metadata = {
   title: "Welcome to Pro",
   description: "Thank you for upgrading to NightBeam Pro.",
+  robots: noIndexRobots,
 };
 
 export default function CommunitySuccessPage() {

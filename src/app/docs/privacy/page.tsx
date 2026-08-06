@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { PixelHeading } from "@/components/ui/pixel-heading";
+import { absoluteUrl } from "@/lib/seo/site";
 
-export const metadata: Metadata = { title: "Privacy" };
+export const metadata: Metadata = {
+  title: "Privacy",
+  description:
+    "NightBeam Studio privacy policy — what we collect, how accounts and cookies work, and how to contact us.",
+  alternates: { canonical: absoluteUrl("/docs/privacy") },
+};
 
 export default function PrivacyPage() {
   return (

@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/guards";
+import { noIndexRobots } from "@/lib/seo/site";
 import { cn } from "@/lib/utils/cn";
+
+export const metadata: Metadata = { robots: noIndexRobots };
 
 const LINKS = [
   { href: "/dashboard", label: "Overview" },

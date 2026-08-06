@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardBody } from "@/components/ui/card";
 import { PixelHeading } from "@/components/ui/pixel-heading";
-
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+import { absoluteUrl } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "NightBeam Studio is a story-first studio building Minecraft mods and worlds.",
-  alternates: { canonical: `${siteUrl}/about` },
+  description:
+    "NightBeam Studio is a story-first Minecraft mod studio — creators of The Birth of Steve and handcrafted worlds.",
+  alternates: { canonical: absoluteUrl("/about") },
 };
 
 const VALUES = [

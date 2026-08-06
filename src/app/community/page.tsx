@@ -6,13 +6,13 @@ import { PixelHeading } from "@/components/ui/pixel-heading";
 import { auth } from "@/lib/auth/auth";
 import { isStripeConfigured } from "@/lib/config/env";
 import { getRepo } from "@/lib/db/repo";
-
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
+import { absoluteUrl, getSiteUrl } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
   title: "Membership",
-  description: "Choose a free or Pro NightBeam Studio membership.",
-  alternates: { canonical: `${siteUrl}/community` },
+  description:
+    "Join NightBeam Studio — free community access or Pro membership with priority support, early access, and Discord perks.",
+  alternates: { canonical: absoluteUrl("/community") },
 };
 
 const FREE_BENEFITS = [
@@ -50,6 +50,7 @@ export default async function CommunityPage() {
     }
   }
 
+  const siteUrl = getSiteUrl();
   const membershipJsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

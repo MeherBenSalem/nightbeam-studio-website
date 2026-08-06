@@ -5,16 +5,21 @@ import { Pagination } from "@/components/ui/pagination";
 import { PixelHeading } from "@/components/ui/pixel-heading";
 import { EmptyState } from "@/components/ui/state";
 import { getRepo } from "@/lib/db/repo";
+import { absoluteUrl } from "@/lib/seo/site";
 import { parseFilterParams, serializeFilterParams } from "@/lib/utils/url-filters";
 
 export const revalidate = 60;
 
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
-
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Browse the NightBeam Studio catalog — mods, packs, and tools for Minecraft.",
-  alternates: { canonical: `${siteUrl}/projects` },
+  description:
+    "Browse NightBeam Studio Minecraft mods, modpacks, and tools — including The Birth of Steve. Filter by loader, version, and category.",
+  openGraph: {
+    title: "NightBeam Studio Projects — Minecraft Mods & Worlds",
+    description:
+      "Browse NightBeam Studio Minecraft mods, modpacks, and tools — including The Birth of Steve.",
+  },
+  alternates: { canonical: absoluteUrl("/projects") },
 };
 
 export default async function ProjectsPage({

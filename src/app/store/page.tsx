@@ -7,15 +7,20 @@ import { PixelHeading } from "@/components/ui/pixel-heading";
 import { EmptyState } from "@/components/ui/state";
 import type { StoreCategory, StoreFilters } from "@/lib/db/types";
 import { getRepo } from "@/lib/db/repo";
+import { absoluteUrl } from "@/lib/seo/site";
 
 export const revalidate = 60;
 
-const siteUrl = process.env.APP_URL ?? "http://localhost:3000";
-
 export const metadata: Metadata = {
   title: "Store",
-  description: "Browse NightBeam Studio products on BuiltByBit — plugins, setups, configs, and more.",
-  alternates: { canonical: `${siteUrl}/store` },
+  description:
+    "Shop NightBeam Studio products on BuiltByBit — plugins, server setups, configs, models, and more for Minecraft.",
+  openGraph: {
+    title: "NightBeam Studio Store — Minecraft Plugins & Setups",
+    description:
+      "Shop NightBeam Studio products on BuiltByBit — plugins, server setups, configs, and more.",
+  },
+  alternates: { canonical: absoluteUrl("/store") },
 };
 
 function parseStoreFilters(raw: Record<string, string | string[] | undefined>): StoreFilters {

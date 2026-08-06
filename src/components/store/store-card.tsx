@@ -14,7 +14,7 @@ export function StoreCard({ product }: { product: StoreProductSummary }) {
       <div className="flex items-start gap-4">
         {product.iconUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.iconUrl} alt="" className="h-14 w-14 rounded-lg border border-night-500/60 object-cover" />
+          <img src={product.iconUrl} alt={product.name} className="h-14 w-14 rounded-lg border border-night-500/60 object-cover" />
         ) : (
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-night-500/60 bg-gradient-to-br from-amber-600/40 via-night-800 to-cyan-500/30 font-pixel text-xl text-white">
             {product.name.slice(0, 1)}

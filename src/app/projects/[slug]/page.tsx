@@ -10,6 +10,7 @@ import { ScreenshotGallery } from "@/components/projects/screenshot-gallery";
 import { ViewTracker } from "@/components/projects/view-tracker";
 import { requireUser } from "@/lib/auth/guards";
 import { getRepo } from "@/lib/db/repo";
+import { absoluteUrl, softwareApplicationJsonLd } from "@/lib/seo/site";
 import { formatBytes, formatDate, formatNumber } from "@/lib/utils/format";
 
 export const revalidate = 60;
@@ -19,13 +20,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const repo = await getRepo();
   const project = await repo.getProjectBySlug(slug);
   if (!project) return { title: "Project not found" };
+  const image = project.bannerUrl ?? project.iconUrl ?? undefined;
   return {
     title: project.name,
     description: project.summary,
+    alternates: { canonical: absoluteUrl(`/projects/${slug}`) },
     openGraph: {
       title: `${project.name} — NightBeam Studio`,
       description: project.summary,
       type: "website",
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.name} — NightBeam Studio`,
+      description: project.summary,
+      images: image ? [image] : undefined,
     },
   };
 }
@@ -42,19 +52,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const latestVersion = project.versions[0];
   const primaryFile = latestVersion?.files.find((file) => file.kind === "primary") ?? latestVersion?.files[0];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+  const jsonLd = softwareApplicationJsonLd({
     name: project.name,
-    applicationCategory: "GameApplication",
-    operatingSystem: "Minecraft Java Edition",
-    description: project.summary,
-    author: { "@type": "Organization", name: project.studioName },
-    creator: { "@type": "Person", name: project.authorName },
-    softwareVersion: project.latestVersion ?? undefined,
-    dateModified: project.updatedAt.toISOString(),
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  };
+    slug: project.slug,
+    summary: project.summary,
+    iconUrl: project.iconUrl,
+    bannerUrl: project.bannerUrl,
+    studioName: project.studioName,
+    authorName: project.authorName,
+    latestVersion: project.latestVersion,
+    updatedAt: project.updatedAt,
+  });
 
   const tabs = [
     {
@@ -112,7 +120,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="flex flex-wrap items-start gap-6">
           {project.iconUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={project.iconUrl} alt="" className="h-20 w-20 rounded-xl border border-night-500/60 object-cover" />
+            <img src={project.iconUrl} alt={project.name} className="h-20 w-20 rounded-xl border border-night-500/60 object-cover" />
           ) : (
             <div className="grid h-20 w-20 place-items-center rounded-xl border border-night-500/60 bg-gradient-to-br from-purple-600/40 via-night-800 to-cyan-500/30 font-pixel text-2xl text-white">
               {project.name.slice(0, 1)}

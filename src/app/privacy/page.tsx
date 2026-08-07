@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Privacy",
   description:
     "NightBeam Studio privacy policy — what we collect, how accounts and cookies work, and how to contact us.",
-  alternates: { canonical: absoluteUrl("/docs/privacy") },
+  alternates: { canonical: absoluteUrl("/privacy") },
 };
 
 export default function PrivacyPage() {

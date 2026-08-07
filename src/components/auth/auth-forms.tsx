@@ -114,7 +114,7 @@ export function RegisterForm() {
           <input type="checkbox" name="acceptTerms" value="on" required className="mt-0.5 accent-pixel-cyan" />
           <span>
             I agree to the{" "}
-            <Link href="/docs/privacy" className="text-pixel-cyan hover:underline">
+            <Link href="/privacy" className="text-pixel-cyan hover:underline">
               Privacy Policy
             </Link>{" "}
             and the site&apos;s community rules.

@@ -40,7 +40,6 @@ export async function Footer() {
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link className="text-slate-400 hover:text-white" href="/projects">Projects</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/store">Store</Link></li>
-              <li><Link className="text-slate-400 hover:text-white" href="/docs">Documentation</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/about">About</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/community">Membership</Link></li>
             </ul>
@@ -52,7 +51,7 @@ export async function Footer() {
               <li><Link className="text-slate-400 hover:text-white" href="/auth/login">Sign in</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/auth/register">Create account</Link></li>
               <li><Link className="text-slate-400 hover:text-white" href="/dashboard">Dashboard</Link></li>
-              <li><Link className="text-slate-400 hover:text-white" href="/docs/privacy">Privacy</Link></li>
+              <li><Link className="text-slate-400 hover:text-white" href="/privacy">Privacy</Link></li>
             </ul>
           </div>
         </div>

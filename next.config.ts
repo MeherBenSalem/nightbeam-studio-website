@@ -45,6 +45,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      { source: "/docs", destination: "/", permanent: false },
+      { source: "/docs/privacy", destination: "/privacy", permanent: true },
+      { source: "/docs/:path*", destination: "/", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

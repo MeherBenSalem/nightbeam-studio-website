@@ -20,7 +20,6 @@ export interface NavUser {
 const LINKS = [
   { href: "/projects", label: "Projects" },
   { href: "/store", label: "Store" },
-  { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
   { href: "/community", label: "Membership" },
 ];

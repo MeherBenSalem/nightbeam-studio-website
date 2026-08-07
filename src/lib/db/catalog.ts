@@ -2,8 +2,11 @@
 //
 // Seeded from the actual mod repository facts: "The Birth of Steve",
 // v0.4.0, Minecraft 26.1.2 / 26.2, NeoForge + Fabric, author Mahou.
-// Everything else is realistic placeholder copy that is replaced when
-// live CurseForge data arrives.
+// Jauml docs are authored from the real Jauml MultiLoader repo (2.1.1).
+// CurseForge sync replaces listing/version metadata but preserves authored docs
+// when the sync payload ships an empty docs array.
+
+import { JAUML_CONTENT } from "@/content/projects/jauml";
 
 export const SEED_PROJECTS = [
   {
@@ -150,6 +153,91 @@ export const SEED_PROJECTS = [
     dependencies: [],
     comments: [],
   },
+  {
+    id: "seed-jauml",
+    slug: "jauml",
+    name: "Jauml",
+    summary:
+      "Lightweight JSON configuration library for Minecraft mods — load, save, validate, and migrate configs without boilerplate.",
+    description: [
+      "## Just Another Utility Minecraft Lib",
+      "",
+      "Jauml is a MultiLoader JSON configuration utility for Minecraft mod developers. Players install it when another mod depends on it.",
+      "",
+      "Library version **2.1.1**. Fabric, Forge, and NeoForge builds are published on CurseForge, Modrinth, and GitHub Releases.",
+      "",
+      "Documentation on this site is authored from the Jauml repository itself — not invented marketing copy.",
+    ].join("\n"),
+    type: "MOD",
+    authorName: "NAIZO",
+    studioName: "NightBeam Studio",
+    curseforgeId: 1281310,
+    githubUrl: "https://github.com/MeherBenSalem/jauml",
+    curseforgeUrl: "https://www.curseforge.com/minecraft/mc-mods/jauml",
+    iconUrl: "https://media.forgecdn.net/avatars/1965/415/639215265643251019.png",
+    bannerUrl: null,
+    featured: true,
+    status: "ACTIVE",
+    downloads: 0,
+    followers: 0,
+    views: 0,
+    rating: 0,
+    minecraftVersions: ["1.20.1", "1.21.1", "1.21.11", "26.1.2", "26.2"],
+    loaders: ["FABRIC", "FORGE", "NEOFORGE"],
+    categories: [
+      { slug: "utility", name: "Utility" },
+      { slug: "technology", name: "Technology" },
+    ],
+    tags: [
+      { slug: "library", name: "library" },
+      { slug: "config", name: "config" },
+      { slug: "json", name: "json" },
+    ],
+    versions: [
+      {
+        id: "seed-jauml-v-2-1-1",
+        version: "2.1.1",
+        minecraftVersions: ["1.20.1", "1.21.1", "1.21.11", "26.1.2", "26.2"],
+        loaders: ["FABRIC", "FORGE", "NEOFORGE"],
+        changelog:
+          "2.1.1 — removed legacy MixinMinecraft stub that crashed Fabric/NeoForge when older 1.3.0 jars were still installed. See CHANGELOG.md in the Jauml repo.",
+        releaseDate: new Date("2026-07-30T00:00:00Z"),
+        releaseType: "RELEASE",
+        isLatest: true,
+        files: [
+          {
+            id: "seed-jauml-file-placeholder",
+            fileName: "jauml-2.1.1.jar",
+            fileSize: 0,
+            downloads: 0,
+            downloadUrl: "https://www.curseforge.com/minecraft/mc-mods/jauml/files",
+            sha1: null,
+            kind: "primary",
+          },
+        ],
+      },
+    ],
+    screenshots: [],
+    changelogs: [
+      {
+        id: "seed-jauml-cl-2-1-1",
+        version: "2.1.1",
+        title: "Jauml 2.1.1",
+        content:
+          "Fixed InvalidMixinException from legacy MixinMinecraft stub on 1.3.0 jars. Publish workflow uploads MultiLoader jars to Modrinth, CurseForge, and GitHub Releases.",
+        publishedAt: new Date("2026-07-30T00:00:00Z"),
+      },
+    ],
+    docs: JAUML_CONTENT.docs.map((doc, index) => ({
+      id: `seed-jauml-doc-${doc.slug}`,
+      slug: doc.slug,
+      title: doc.title,
+      sortOrder: doc.sortOrder ?? index,
+      content: doc.content,
+    })),
+    dependencies: [],
+    comments: [],
+  },
 ];
 
 export const SEED_CATEGORIES = [
@@ -166,6 +254,9 @@ export const SEED_TAGS = [
   { slug: "steve", name: "steve" },
   { slug: "narrative", name: "narrative" },
   { slug: "quests", name: "quests" },
+  { slug: "library", name: "library" },
+  { slug: "config", name: "config" },
+  { slug: "json", name: "json" },
 ] as const;
 
 export const SEED_ANNOUNCEMENTS = [

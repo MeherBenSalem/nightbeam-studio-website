@@ -245,6 +245,44 @@ body {
   color: #94a3b8;
   margin: 1rem 0;
 }
+.nb-prose a {
+  color: var(--color-pixel-cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.nb-prose a:hover {
+  color: #fff;
+}
+.nb-prose pre {
+  margin: 1rem 0;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-night-500) 60%, transparent);
+  background: color-mix(in srgb, var(--color-night-900) 80%, #000);
+  padding: 0.85rem 1rem;
+}
+.nb-prose pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.85em;
+}
+.nb-prose table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.nb-prose th,
+.nb-prose td {
+  border: 1px solid color-mix(in srgb, var(--color-night-500) 55%, transparent);
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+.nb-prose th {
+  color: #f1f5f9;
+  background: color-mix(in srgb, var(--color-night-800) 70%, transparent);
+}
 
 /* ------------------------------------------------------------------ */
 /* Light mode: flips the night/pixel palette to light surfaces.        */

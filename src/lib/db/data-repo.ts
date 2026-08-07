@@ -67,6 +67,11 @@ export interface DataRepo {
   listProjects(filters: ProjectFilters): Promise<ProjectListResult>;
   getProjectBySlug(slug: string, userId?: string | null): Promise<ProjectDetail | null>;
   upsertCurseForgeProject(detail: ProjectDetail): Promise<void>;
+  /** Replace authored documentation for a project identified by slug. Returns false if the project is missing. */
+  replaceProjectDocs(
+    slug: string,
+    docs: Array<{ slug: string; title: string; content: string; sortOrder: number }>,
+  ): Promise<boolean>;
   listStoreProducts(filters: StoreFilters): Promise<StoreListResult>;
   getStoreProductBySlug(slug: string, userId?: string | null): Promise<StoreProductDetail | null>;
   upsertStoreProduct(detail: StoreProductDetail): Promise<void>;

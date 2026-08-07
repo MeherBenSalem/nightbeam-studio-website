@@ -12,6 +12,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { getRepo } from "@/lib/db/repo";
 import { absoluteUrl, softwareApplicationJsonLd } from "@/lib/seo/site";
 import { formatBytes, formatDate, formatNumber } from "@/lib/utils/format";
+import { renderMarkdown } from "@/lib/utils/markdown";
 
 export const revalidate = 60;
 
@@ -98,6 +99,31 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                       </li>
                     ))}
                   </ul>
+                </CardBody>
+              </Card>
+            ))
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "docs",
+      label: "Docs",
+      content: (
+        <div className="space-y-5">
+          {project.docs.length === 0 ? (
+            <EmptyState
+              title="No documentation yet"
+              body="Project docs are authored from the real repository, then published with npm run docs:upsert. See /docs/adding-projects."
+            />
+          ) : (
+            project.docs.map((doc) => (
+              <Card key={doc.id}>
+                <CardHeader>
+                  <CardTitle>{doc.title}</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <div className="nb-prose text-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(doc.content) }} />
                 </CardBody>
               </Card>
             ))

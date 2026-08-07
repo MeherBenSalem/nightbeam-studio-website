@@ -51,6 +51,11 @@ export const memoryRepo: DataRepo = {
     memoryStore.upsertCurseForgeProject(detail);
   },
 
+  async replaceProjectDocs(slug, docs) {
+    await memoryStore.ensureSeeded();
+    return memoryStore.replaceProjectDocs(slug, docs);
+  },
+
   async listStoreProducts(filters) {
     await memoryStore.ensureSeeded();
     return memoryStore.listStoreProducts(filters);

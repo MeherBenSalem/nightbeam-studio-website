@@ -320,13 +320,37 @@ export const prismaRepo: DataRepo = {
           data: { projectId, version: changelog.version, title: changelog.title, content: changelog.content, publishedAt: changelog.publishedAt },
         });
       }
-      await tx.documentationPage.deleteMany({ where: { projectId } });
-      for (const doc of detail.docs) {
+      // CurseForge mapper does not ship authored docs — preserve existing pages unless sync provides replacements.
+      if (detail.docs.length > 0) {
+        await tx.documentationPage.deleteMany({ where: { projectId } });
+        for (const doc of detail.docs) {
+          await tx.documentationPage.create({
+            data: { projectId, slug: doc.slug, title: doc.title, content: doc.content, sortOrder: doc.sortOrder },
+          });
+        }
+      }
+    });
+  },
+
+  async replaceProjectDocs(slug, docs) {
+    const prisma = requireDb();
+    const project = await prisma.project.findUnique({ where: { slug }, select: { id: true } });
+    if (!project) return false;
+    await prisma.$transaction(async (tx) => {
+      await tx.documentationPage.deleteMany({ where: { projectId: project.id } });
+      for (const doc of docs) {
         await tx.documentationPage.create({
-          data: { projectId, slug: doc.slug, title: doc.title, content: doc.content, sortOrder: doc.sortOrder },
+          data: {
+            projectId: project.id,
+            slug: doc.slug,
+            title: doc.title,
+            content: doc.content,
+            sortOrder: doc.sortOrder,
+          },
         });
       }
     });
+    return true;
   },
 
   async listStoreProducts(filters: StoreFilters = {}): Promise<StoreListResult> {

@@ -845,10 +845,12 @@ export class MemoryDataStore {
 
   upsertCurseForgeProject(detail: ProjectDetail): void {
     const existingId = this.slugIndex.get(detail.slug);
+    const existing = existingId ? this.projects.get(existingId) : undefined;
     if (existingId && existingId !== detail.id) {
       this.projects.delete(existingId);
     }
-    this.projects.set(detail.id, detail);
+    const docs = detail.docs.length > 0 ? detail.docs : (existing?.docs ?? []);
+    this.projects.set(detail.id, { ...detail, docs });
     this.slugIndex.set(detail.slug, detail.id);
     for (const category of detail.categories) {
       if (!this.categories.has(category.slug)) this.categories.set(category.slug, category);
@@ -856,6 +858,27 @@ export class MemoryDataStore {
     for (const tag of detail.tags) {
       if (!this.tags.has(tag.slug)) this.tags.set(tag.slug, tag);
     }
+  }
+
+  replaceProjectDocs(
+    slug: string,
+    docs: Array<{ slug: string; title: string; content: string; sortOrder: number }>,
+  ): boolean {
+    const id = this.slugIndex.get(slug);
+    if (!id) return false;
+    const project = this.projects.get(id);
+    if (!project) return false;
+    this.projects.set(id, {
+      ...project,
+      docs: docs.map((doc, index) => ({
+        id: `doc-${slug}-${doc.slug}`,
+        slug: doc.slug,
+        title: doc.title,
+        content: doc.content,
+        sortOrder: doc.sortOrder ?? index,
+      })),
+    });
+    return true;
   }
 
   private toStoreSummary(detail: StoreProductDetail): StoreProductSummary {

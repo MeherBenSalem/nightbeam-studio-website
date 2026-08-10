@@ -96,16 +96,5 @@
   "94": "@types/react",
   "95": "@types/react-dom",
   "96": "@vitejs/plugin-react",
-  "97": "vite.config.ts",
-  "98": "knowledge.ts",
-  "99": "webhook.ts",
-  "100": "StoreProductDetail",
-  "101": "page.tsx",
-  "102": "chat-markdown.tsx",
-  "103": "settings-form.tsx",
-  "104": "HomeSectionDto",
-  "105": "page.tsx",
-  "106": "@playwright/test",
-  "107": "@types/node-cron",
-  "108": "vitest"
+  "97": "vite.config.ts"
 }

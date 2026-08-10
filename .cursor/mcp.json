@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "nightbeam-ops": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "C:/Users/mahou/OneDrive/Documents/GitHub/nightbeam-studio-website/tools/nightbeam-ops/src/mcp/server.ts"
+      ],
+      "env": {
+        "NIGHTBEAM_OPS_DATA": "C:/Users/mahou/AppData/Roaming/nightbeam-ops"
+      }
+    }
+  }
+}

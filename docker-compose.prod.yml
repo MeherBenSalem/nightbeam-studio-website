@@ -38,6 +38,9 @@ services:
       PORT: 3000
     env_file:
       - .env
+    ports:
+      # Nginx on the host proxies frontend to :3003.
+      - "3003:3000"
     expose:
       - "3000"
     depends_on:

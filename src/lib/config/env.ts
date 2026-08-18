@@ -91,6 +91,9 @@ const serverEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PRICE_ID_PRO: z.string().optional(),
+  STRIPE_PRICE_ID_DONATE_3: z.string().optional(),
+  STRIPE_PRICE_ID_DONATE_5: z.string().optional(),
+  STRIPE_PRICE_ID_DONATE_10: z.string().optional(),
 
   // --- SEO ------------------------------------------------------------
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
@@ -148,6 +151,11 @@ export function getProRoles(): Set<string> {
 export function isStripeConfigured(): boolean {
   const env = getServerEnv();
   return Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_PRICE_ID_PRO && env.STRIPE_WEBHOOK_SECRET);
+}
+
+export function isDonationsConfigured(): boolean {
+  const env = getServerEnv();
+  return Boolean(env.STRIPE_SECRET_KEY);
 }
 
 export function isBuiltByBitConfigured(): boolean {

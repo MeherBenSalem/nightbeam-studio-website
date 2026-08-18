@@ -22,6 +22,7 @@ const LINKS = [
   { href: "/store", label: "Store" },
   { href: "/about", label: "About" },
   { href: "/community", label: "Membership" },
+  { href: "/support", label: "Support Us" },
 ];
 
 function openChatWidget() {
